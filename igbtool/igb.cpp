@@ -572,6 +572,9 @@ void IgbFile::print_graph_child(std::string& str,
   str += fmt::format("+-- {:04X} ", id);
 
   bool recursive = std::find(id_stack.cbegin(), id_stack.cend(), id) != id_stack.cend();
+  if (recursive) {
+    lg::warn("Infinite recursion on {:04X} detected", id);
+  }
 
   id_stack.push_back(id);
   child_bits.push_back(print_child);
@@ -627,7 +630,6 @@ void IgbFile::print_graph_child(std::string& str,
         }
       } else {
         str += fmt::format(" (recursive)\n");
-        lg::warn("Infinite recursion on {:04X} detected", id);
       }
     } break;
   }
