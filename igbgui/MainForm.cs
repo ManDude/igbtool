@@ -9,10 +9,16 @@ namespace igbgui
     public partial class MainForm : Form
     {
         private IGB currentIGB;
+        private IGBViewerSettings viewerSettings;
 
         public MainForm()
         {
             InitializeComponent();
+            viewerSettings = new()
+            {
+                DisplayAABBs = true,
+                DisplayOBBs = true
+            };
             var settings = new GLControlSettings()
             {
                 Flags = ContextFlags.Debug,
@@ -20,7 +26,7 @@ namespace igbgui
                 APIVersion = Version.Parse("4.3.0.0"),
                 Profile = ContextProfile.Core
             };
-            var viewer = new IGBViewer(settings, () => { return currentIGB; }) { Dock = DockStyle.Fill };
+            var viewer = new IGBViewer(viewerSettings, settings, () => { return currentIGB; }) { Dock = DockStyle.Fill };
             Controls.Add(viewer);
         }
 
@@ -41,6 +47,12 @@ namespace igbgui
                     currentIGB = IGB.Load(File.ReadAllBytes(dialog.FileName));
                 }
             }
+        }
+
+        private void viewerSettingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var newform = new ViewerSettingsForm(viewerSettings);
+            newform.ShowDialog();
         }
     }
 }
