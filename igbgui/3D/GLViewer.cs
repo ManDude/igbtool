@@ -1,0 +1,290 @@
+﻿using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
+using OpenTK.WinForms;
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
+
+namespace igbgui
+{
+    public partial class GLViewer : GLControl
+    {
+        // Points of a triangle in normalized device coordinates.
+        readonly float[] Points = new float[12] {
+            // X, Y, Z, W
+            -0.5f, -0.5f, 0.0f, 1f,
+            0.5f, -0.5f, 0.0f, 1f,
+            0.0f, 0.5f, 0.0f, 1f };
+        readonly float[] Colors = new float[12] {
+            // R, G, B, A
+            1f, 0f, 0f, 1f,
+            0f, 1f, 0f, 1f,
+            0f, 0f, 1f, 1f};
+
+        // Points of a triangle in normalized device coordinates.
+        readonly float[] AxesPos = new float[] {
+            // X, Y, Z, W
+            -0.5f, 0, 0, 1,
+            1, 0, 0, 1,
+            0, -0.5f, 0, 1,
+            0, 1, 0, 1,
+            0, 0, -0.5f, 1,
+            0, 0, 1, 1
+        };
+        readonly float[] AxesCol = new float[] {
+            // R, G, B, A
+            1, 0, 0, 1,
+            1, 0, 0, 1,
+            0, 1, 0, 1,
+            0, 1, 0, 1,
+            0, 0, 1, 1,
+            0, 0, 1, 1
+        };
+
+        private readonly RenderInfo render;
+
+        private VAO vaoTest;
+        private VAO vaoAxes;
+
+        private Timer frametimer;
+        private bool run = false;
+
+        private readonly HashSet<Keys> keysdown = new();
+        private readonly HashSet<Keys> keyspressed = new();
+        private bool KDown(Keys key) => keysdown.Contains(key);
+        private bool KPress(Keys key) => keyspressed.Contains(key);
+        private bool mouseright = false;
+        private bool mouseleft = false;
+        private int mousex = 0;
+        private int mousey = 0;
+        private float movespeed = 5f;
+        private float rotspeed = 0.5f;
+
+        private const float PerFrame = 1f / 60f;
+
+        public GLViewer(GLControlSettings settings) : base(settings)
+        {
+            // window update
+            frametimer = new();
+            frametimer.Interval = 10;
+            frametimer.Tick += (sender, e) =>
+            {
+                Invalidate();
+            };
+
+            render = new RenderInfo(this);
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            // Enable debug callbacks.
+            GL.Enable(EnableCap.DebugOutput);
+            GL.DebugMessageCallback((source, type, id, severity, length, message, userParam) =>
+            {
+                string msg = Marshal.PtrToStringAnsi(message);
+                switch (severity)
+                {
+                    case DebugSeverity.DebugSeverityHigh:
+                        Console.WriteLine("OpenGL ERROR: " + msg);
+                        break;
+                    case DebugSeverity.DebugSeverityMedium:
+                        Console.WriteLine("OpenGL WARN: " + msg);
+                        break;
+                    case DebugSeverity.DebugSeverityLow:
+                        Console.WriteLine("OpenGL INFO: " + msg);
+                        break;
+                    default:
+                        Console.WriteLine("OpenGL NOTIF: " + msg);
+                        break;
+                }
+            }, IntPtr.Zero);
+            // version print
+            Console.WriteLine("OpenGL version: " + GL.GetString(StringName.Version));
+
+            GL.Enable(EnableCap.DepthTest);
+
+            // init all shaders
+            Shader.InitShaders();
+
+            // init test vao
+            vaoTest = new VAO("test", PrimitiveType.Triangles, positions: Points, colors: Colors);
+
+            // init axes vao
+            vaoAxes = new VAO("axes", PrimitiveType.Lines, positions: AxesPos, colors: AxesCol);
+
+            // set the clear color to black
+            GL.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+            // enable window timer
+            frametimer.Enabled = true;
+            // enable logic
+            run = true;
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            lock (render.mLock)
+            {
+                render.Projection.Width = Width;
+                render.Projection.Height = Height;
+
+                render.Projection.Perspective = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45), render.Projection.Aspect, 0.01f, 4096f);
+                render.Projection.View = Matrix4.CreateTranslation(render.Projection.Trans) * Matrix4.CreateFromQuaternion(new Quaternion(render.Projection.Rot));
+
+                // Clear the color buffer.
+                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+                GL.Viewport(0, 0, Width, Height);
+
+                Shader.PrepareShaders(render);
+
+                // render
+                vaoTest.Render(render);
+                vaoAxes.Render(render);
+            }
+
+            // Swap the front/back buffers so what we just rendered to the back buffer is displayed in the window.
+            Context.SwapBuffers();
+            base.OnPaint(e);
+        }
+
+        public void RunLogic()
+        {
+            if (!run) return;
+            ActualRunLogic();
+            keyspressed.Clear();
+        }
+
+        protected virtual void ActualRunLogic()
+        {
+            var d = movespeed * PerFrame;
+            if (KDown(Keys.ControlKey))
+            {
+                if (KDown(Keys.W)) render.Projection.Trans.Z += d;
+                if (KDown(Keys.S)) render.Projection.Trans.Z -= d;
+                if (KDown(Keys.A)) render.Projection.Trans.X += d;
+                if (KDown(Keys.D)) render.Projection.Trans.X -= d;
+                if (KDown(Keys.E)) render.Projection.Trans.Y += d;
+                if (KDown(Keys.Q)) render.Projection.Trans.Y -= d;
+            }
+            else
+            {
+                var r = Matrix4.CreateFromQuaternion(new Quaternion(render.Projection.Rot));
+                if (KDown(Keys.W)) render.Projection.Trans += (r * new Vector4(0, 0, d, 1)).Xyz;
+                if (KDown(Keys.S)) render.Projection.Trans -= (r * new Vector4(0, 0, d, 1)).Xyz;
+                if (KDown(Keys.A)) render.Projection.Trans += (r * new Vector4(d, 0, 0, 1)).Xyz;
+                if (KDown(Keys.D)) render.Projection.Trans -= (r * new Vector4(d, 0, 0, 1)).Xyz;
+                if (KDown(Keys.E)) render.Projection.Trans += (r * new Vector4(0, d, 0, 1)).Xyz;
+                if (KDown(Keys.Q)) render.Projection.Trans -= (r * new Vector4(0, d, 0, 1)).Xyz;
+            }
+            if (KPress(Keys.R))
+            {
+                render.Projection.Trans = new(0);
+                render.Projection.Rot = new(0);
+                render.Distance = 5;
+            }
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            if (KDown(e.KeyCode)) return;
+            keysdown.Add(e.KeyCode);
+            keyspressed.Add(e.KeyCode);
+        }
+
+        protected override void OnKeyUp(KeyEventArgs e)
+        {
+            base.OnKeyUp(e);
+            keysdown.Remove(e.KeyCode);
+        }
+
+        protected override void OnLostFocus(EventArgs e)
+        {
+            base.OnLostFocus(e);
+            keysdown.Clear(); // release all keys on unfocus
+            mouseleft = false;
+            mouseright = false;
+        }
+
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            base.OnMouseWheel(e);
+            lock (render.mLock)
+            {
+                var olddist = render.Distance;
+                render.Distance = Math.Max(1, Math.Min(render.Distance - (float)e.Delta / SystemInformation.MouseWheelScrollDelta, 25));
+                render.Projection.Trans -= (Matrix4.CreateFromQuaternion(new Quaternion(render.Projection.Rot)) * new Vector4(0, 0, render.Distance - olddist, 1)).Xyz;
+            }
+        }
+
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            base.OnMouseDown(e);
+            switch (e.Button)
+            {
+                case MouseButtons.Left: mouseleft = true; /*mousex = e.X; mousey = e.Y;*/ break;
+                case MouseButtons.Right: mouseright = true; break;
+            }
+        }
+
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            base.OnMouseUp(e);
+            switch (e.Button)
+            {
+                case MouseButtons.Left: mouseleft = false; break;
+                case MouseButtons.Right: mouseright = false; break;
+            }
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+            lock (render.mLock)
+            {
+                if (mouseleft)
+                {
+                    float roty = render.Projection.Rot.X;
+                    float rotx = render.Projection.Rot.Y;
+                    rotx += MathHelper.DegreesToRadians(e.X - mousex) * rotspeed;
+                    roty += MathHelper.DegreesToRadians(e.Y - mousey) * rotspeed;
+                    // rotx %= 360;
+                    if (roty > MathHelper.PiOver2)
+                        roty = MathHelper.PiOver2;
+                    if (roty < -MathHelper.PiOver2)
+                        roty = -MathHelper.PiOver2;
+                    render.Projection.Rot.X = roty;
+                    render.Projection.Rot.Y = rotx;
+                }
+                else if (mouseright)
+                {
+                }
+                mousex = e.X;
+                mousey = e.Y;
+            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            frametimer.Enabled = false;
+            frametimer = null;
+            base.Dispose(disposing);
+        }
+
+        ~GLViewer()
+        {
+            // Unbind all the resources by binding the targets to 0/null.
+            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            GL.BindVertexArray(0);
+            GL.UseProgram(0);
+
+            // Delete all the resources.
+            vaoTest = null;
+            Shader.KillShaders();
+        }
+    }
+}

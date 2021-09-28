@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Shaders\axes.vert" />
+    <None Remove="Shaders\default4.frag" />
+    <None Remove="Shaders\line-static.vert" />
+    <None Remove="Shaders\test.vert" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Shaders\default4.frag" />
+    <EmbeddedResource Include="Shaders\line-static.vert" />
+    <EmbeddedResource Include="Shaders\axes.vert" />
+    <EmbeddedResource Include="Shaders\test.vert" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenTK" Version="4.6.7" />
+    <PackageReference Include="OpenTK.WinForms" Version="4.0.0-pre.6" />
+  </ItemGroup>
+
+</Project>

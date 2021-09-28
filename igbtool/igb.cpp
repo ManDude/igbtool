@@ -281,12 +281,12 @@ IgbFile::IgbFile(const std::vector<u8>& data) {
     oldseek = seek;
     for (int i = 0; i < header->sections[0].count; ++i) {
       IgbRef* ref = (IgbRef*)&data.at(seek);
+      ASSERT(ref->unk == 0);
       if (ref->type == 3) {
         IgbObjectRef* objref = (IgbObjectRef*)ref;
         auto& newobj = objs.emplace_back();
         newobj.obj_struct = &structs[objref->struct_id];
         newobj.ref_idx = i;
-        ASSERT(objref->unk == 0);
         ref_idx.emplace_back(IgbRefKind::OBJECT, objs.size() - 1);
       } else if (ref->type == 4) {
         IgbStaticRef* dataref = (IgbStaticRef*)ref;
