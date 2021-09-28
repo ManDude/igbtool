@@ -44,7 +44,7 @@ namespace igbgui
 
         protected readonly RenderInfo render;
 
-        private VAO vaoTest;
+        // private VAO vaoTest;
         private VAO vaoAxes;
         private VAO vaoText;
 
@@ -59,7 +59,7 @@ namespace igbgui
         private bool mouseleft = false;
         private int mousex = 0;
         private int mousey = 0;
-        private float movespeed = 10f;
+        private float movespeed = 25f;
         private float rotspeed = 0.5f;
 
         private const float PerFrame = 1f / 60f;
@@ -111,9 +111,9 @@ namespace igbgui
             Shader.InitShaders();
 
             // init test vao
-            vaoTest = new VAO("test", PrimitiveType.Triangles);
-            vaoTest.UpdatePositions(Points);
-            vaoTest.UpdateColors(Colors);
+            //vaoTest = new VAO("test", PrimitiveType.Triangles);
+            //vaoTest.UpdatePositions(Points);
+            //vaoTest.UpdateColors(Colors);
 
             // init axes vao
             vaoAxes = new VAO("axes", PrimitiveType.Lines);
@@ -157,7 +157,7 @@ namespace igbgui
 
         protected virtual void Render()
         {
-            vaoTest.Render(render);
+            // vaoTest.Render(render);
             vaoAxes.Render(render);
         }
 

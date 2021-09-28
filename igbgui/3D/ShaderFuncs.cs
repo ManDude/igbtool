@@ -32,7 +32,7 @@ namespace igbgui
 
         internal static void RenderLineModel(Shader sh, RenderInfo ri)
         {
-            Matrix4 model = Matrix4.CreateFromQuaternion(ri.Projection.UserQuat);
+            Matrix4 model = Matrix4.CreateFromAxisAngle(ri.Projection.UserVec4.Xyz, ri.Projection.UserVec4.W);
 
             sh.UniformVec3("trans", ref ri.Projection.UserTrans);
             sh.UniformVec3("scale", ref ri.Projection.UserScale);

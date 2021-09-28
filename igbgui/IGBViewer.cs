@@ -81,40 +81,17 @@ namespace igbgui
                     {
                         var pos = aabb.Pos.Value;
                         var size = aabb.Size.Value;
-                        var verts = new Vector4[12 * 2];
-                        float x1 = pos.X - size.X;
-                        float x2 = pos.X + size.X;
-                        float y1 = pos.Y - size.Y;
-                        float y2 = pos.Y + size.Y;
-                        float z1 = pos.Z - size.Z;
-                        float z2 = pos.Z + size.Z;
-                        verts[0] = new Vector4(x1, y1, z1, 1);
-                        verts[2] = new Vector4(x2, y1, z1, 1);
-                        verts[4] = new Vector4(x2, y1, z2, 1);
-                        verts[6] = new Vector4(x1, y1, z2, 1);
-                        verts[1] = new Vector4(x1, y2, z1, 1);
-                        verts[3] = new Vector4(x2, y2, z1, 1);
-                        verts[5] = new Vector4(x2, y2, z2, 1);
-                        verts[7] = new Vector4(x1, y2, z2, 1);
-                        for (int i = 0; i < 2; ++i)
-                        {
-                            verts[8 + 8 * i + 0] = verts[0 + i];
-                            verts[8 + 8 * i + 1] = verts[2 + i];
-                            verts[8 + 8 * i + 2] = verts[2 + i];
-                            verts[8 + 8 * i + 3] = verts[4 + i];
-                            verts[8 + 8 * i + 4] = verts[4 + i];
-                            verts[8 + 8 * i + 5] = verts[6 + i];
-                            verts[8 + 8 * i + 6] = verts[6 + i];
-                            verts[8 + 8 * i + 7] = verts[0 + i];
-                        }
                         var cols = new Color4[12 * 2];
                         for (int i = 0; i < cols.Length; ++i)
                         {
                             cols[i] = new Color4(.5f, 0, 0, 1f);
                         }
-                        vaoLines.UpdatePositions(verts);
-                        vaoLines.UpdateColors(cols);
-                        vaoLines.Render(render);
+                        render.Projection.UserTrans = pos;
+                        render.Projection.UserScale = size;
+                        render.Projection.UserVec4 = new Vector4(1, 0, 0, 0);
+                        vaoLineModel.UpdatePositions(boxVerts);
+                        vaoLineModel.UpdateColors(cols);
+                        vaoLineModel.Render(render);
                     }
                     else if (obj is PhantomOBB obb)
                     {
@@ -128,7 +105,7 @@ namespace igbgui
                         }
                         render.Projection.UserTrans = pos;
                         render.Projection.UserScale = size;
-                        render.Projection.UserQuat = new Quaternion(rot.X, rot.Z, rot.Y, rot.W);
+                        render.Projection.UserVec4 = rot;
                         vaoLineModel.UpdatePositions(boxVerts);
                         vaoLineModel.UpdateColors(cols);
                         vaoLineModel.Render(render);
