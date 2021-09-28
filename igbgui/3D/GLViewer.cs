@@ -292,7 +292,7 @@ namespace igbgui
             GL.UseProgram(0);
 
             // Delete all the resources.
-            vaoTest = null;
+            // vaoTest = null;
             vaoAxes = null;
             vaoText = null;
             Shader.KillShaders();
