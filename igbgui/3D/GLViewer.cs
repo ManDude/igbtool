@@ -11,16 +11,16 @@ namespace igbgui
     public partial class GLViewer : GLControl
     {
         // Points of a triangle in normalized device coordinates.
-        readonly float[] Points = new float[12] {
-            // X, Y, Z, W
-            -0.5f, -0.5f, 0.0f, 1f,
-            0.5f, -0.5f, 0.0f, 1f,
-            0.0f, 0.5f, 0.0f, 1f };
-        readonly float[] Colors = new float[12] {
-            // R, G, B, A
-            1f, 0f, 0f, 1f,
-            0f, 1f, 0f, 1f,
-            0f, 0f, 1f, 1f};
+        readonly Vector4[] Points = new Vector4[3] {
+            new Vector4(-0.5f, -0.5f, 0, 1),
+            new Vector4(0.5f, -0.5f, 0, 1),
+            new Vector4(0, 0.5f, 0, 1)
+        };
+        readonly Color4[] Colors = new Color4[3] {
+            new Color4(1, 0, 0, 1f),
+            new Color4(0, 1, 0, 1f),
+            new Color4(0, 0, 1, 1f)
+        };
 
         // Points of a triangle in normalized device coordinates.
         readonly float[] AxesPos = new float[] {
@@ -42,10 +42,11 @@ namespace igbgui
             0, 0, 1, 1
         };
 
-        private readonly RenderInfo render;
+        protected readonly RenderInfo render;
 
         private VAO vaoTest;
         private VAO vaoAxes;
+        private VAO vaoText;
 
         private Timer frametimer;
         private bool run = false;
@@ -110,10 +111,14 @@ namespace igbgui
             Shader.InitShaders();
 
             // init test vao
-            vaoTest = new VAO("test", PrimitiveType.Triangles, positions: Points, colors: Colors);
+            vaoTest = new VAO("test", PrimitiveType.Triangles);
+            vaoTest.UpdatePositions(Points);
+            vaoTest.UpdateColors(Colors);
 
             // init axes vao
-            vaoAxes = new VAO("axes", PrimitiveType.Lines, positions: AxesPos, colors: AxesCol);
+            vaoAxes = new VAO("axes", PrimitiveType.Lines);
+            vaoAxes.UpdatePositions(AxesPos);
+            vaoAxes.UpdateColors(AxesCol);
 
             // set the clear color to black
             GL.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -126,29 +131,34 @@ namespace igbgui
 
         protected override void OnPaint(PaintEventArgs e)
         {
+            // Clear the color buffer.
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+            GL.Viewport(0, 0, Width, Height);
+
             lock (render.mLock)
             {
                 render.Projection.Width = Width;
                 render.Projection.Height = Height;
 
-                render.Projection.Perspective = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45), render.Projection.Aspect, 0.01f, 4096f);
+                render.Projection.Perspective = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45), render.Projection.Aspect, 0.05f, 20000);
                 render.Projection.View = Matrix4.CreateTranslation(render.Projection.Trans) * Matrix4.CreateFromQuaternion(new Quaternion(render.Projection.Rot));
-
-                // Clear the color buffer.
-                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-                GL.Viewport(0, 0, Width, Height);
 
                 Shader.PrepareShaders(render);
 
                 // render
-                vaoTest.Render(render);
-                vaoAxes.Render(render);
+                Render();
             }
 
             // Swap the front/back buffers so what we just rendered to the back buffer is displayed in the window.
             Context.SwapBuffers();
             base.OnPaint(e);
+        }
+
+        protected virtual void Render()
+        {
+            vaoTest.Render(render);
+            vaoAxes.Render(render);
         }
 
         public void RunLogic()
@@ -160,7 +170,7 @@ namespace igbgui
 
         protected virtual void ActualRunLogic()
         {
-            var d = movespeed * PerFrame;
+            var d = movespeed * PerFrame * (render.Distance/RenderInfo.InitialDistance);
             if (KDown(Keys.ControlKey))
             {
                 if (KDown(Keys.W)) render.Projection.Trans.Z += d;
@@ -182,9 +192,7 @@ namespace igbgui
             }
             if (KPress(Keys.R))
             {
-                render.Projection.Trans = new(0);
-                render.Projection.Rot = new(0);
-                render.Distance = 5;
+                render.Reset();
             }
         }
 
@@ -216,7 +224,8 @@ namespace igbgui
             lock (render.mLock)
             {
                 var olddist = render.Distance;
-                render.Distance = Math.Max(1, Math.Min(render.Distance - (float)e.Delta / SystemInformation.MouseWheelScrollDelta, 25));
+                float delta = (float)e.Delta / SystemInformation.MouseWheelScrollDelta;
+                render.Distance = Math.Max(RenderInfo.MinDistance, Math.Min(render.Distance - delta, RenderInfo.MaxDistance));
                 render.Projection.Trans -= (Matrix4.CreateFromQuaternion(new Quaternion(render.Projection.Rot)) * new Vector4(0, 0, render.Distance - olddist, 1)).Xyz;
             }
         }
@@ -284,6 +293,8 @@ namespace igbgui
 
             // Delete all the resources.
             vaoTest = null;
+            vaoAxes = null;
+            vaoText = null;
             Shader.KillShaders();
         }
     }

@@ -8,6 +8,8 @@ namespace igbgui
 {
     public partial class MainForm : Form
     {
+        private IGB currentIGB;
+
         public MainForm()
         {
             InitializeComponent();
@@ -18,7 +20,7 @@ namespace igbgui
                 APIVersion = Version.Parse("4.3.0.0"),
                 Profile = ContextProfile.Core
             };
-            var viewer = new GLViewer(settings) { Dock = DockStyle.Fill };
+            var viewer = new IGBViewer(settings, () => { return currentIGB; }) { Dock = DockStyle.Fill };
             Controls.Add(viewer);
         }
 
@@ -36,7 +38,7 @@ namespace igbgui
             {
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
-                    var igb = IGB.Load(File.ReadAllBytes(dialog.FileName));
+                    currentIGB = IGB.Load(File.ReadAllBytes(dialog.FileName));
                 }
             }
         }

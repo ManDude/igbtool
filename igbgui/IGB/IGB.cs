@@ -1,11 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Reflection;
+using System.Linq;
 
 namespace igbgui
 {
     public sealed class IGB
     {
+        private static Dictionary<string, Type> igbFieldTypes = new();
+        private static Dictionary<string, Type> igbStructTypes = new();
+        static IGB()
+        {
+            var q = from t in Assembly.GetExecutingAssembly().GetTypes()
+                    where t.IsClass && t.Namespace == "igbgui.Types"
+                    select t;
+            q.ToList().ForEach(t => igbFieldTypes.Add(t.Name, t));
+            q = from t in Assembly.GetExecutingAssembly().GetTypes()
+                    where t.IsClass && t.Namespace == "igbgui.Structs"
+                    select t;
+            q.ToList().ForEach(t => igbStructTypes.Add(t.Name, t));
+        }
 
         public static IGB Load(byte[] data)
         {
@@ -22,29 +37,34 @@ namespace igbgui
             }
             uint magic = BitConverter.ToUInt32(data, seek);
             if (magic != 0xFADA)
-                throw new ArgumentException("invalid magic number");
+                throw new Exception("invalid magic number");
             uint version = BitConverter.ToUInt32(data, seek+4);
             seek += 8;
 
             // TYPES
-            var types = new IgbType[counts[4]];
-            var type_name_lengths = new int[types.Length];
-            for (int i = 0; i < types.Length; ++i)
+            var type_name_lengths = new int[counts[4]];
+            var type_bools = new bool[counts[4]];
+            for (int i = 0; i < counts[4]; ++i)
             {
-                types[i] = new();
                 type_name_lengths[i] = BitConverter.ToInt32(data, seek + 0);
                 var booltemp = BitConverter.ToUInt32(data, seek + 4);
                 if (booltemp != 0 && booltemp != 1)
-                    throw new ArgumentException(string.Format("type bool is invalid value {0}", booltemp));
-                types[i].Bool = BitConverter.ToBoolean(data, seek + 4);
+                    throw new Exception(string.Format("type bool is invalid value {0}", booltemp));
+                type_bools[i] = BitConverter.ToBoolean(data, seek + 4);
                 var unkval = BitConverter.ToUInt32(data, seek + 8);
                 if (unkval != 0)
-                    throw new ArgumentException(string.Format("type unknown value is invalid value {0}", unkval));
+                    throw new Exception(string.Format("type unknown value is invalid value {0}", unkval));
                 seek += 12;
             }
+            var types = new IgbType[counts[4]];
             for (int i = 0; i < types.Length; ++i)
             {
-                types[i].Name = Encoding.UTF8.GetString(data, seek, type_name_lengths[i]).TrimNull();
+                var name = Encoding.UTF8.GetString(data, seek, type_name_lengths[i]).TrimNull();
+                types[i] = new IgbType
+                {
+                    Name = name,
+                    Bool = type_bools[i]
+                };
                 seek += type_name_lengths[i];
             }
 
@@ -74,30 +94,30 @@ namespace igbgui
                 var len = BitConverter.ToInt32(data, structdefsk + 0);
                 var name = Encoding.UTF8.GetString(data, seek, len).TrimNull();
                 seek += len;
-                structs[i] = new();
-                structs[i].ID = i;
-                structs[i].Name = name;
-                structs[i].Master = BitConverter.ToBoolean(data, structdefsk + 4);
+                IgbStruct s = new();
+                s.ID = i;
+                s.Name = name;
+                s.Master = BitConverter.ToBoolean(data, structdefsk + 4);
                 var reserved = BitConverter.ToInt32(data, structdefsk + 8);
                 if (reserved != 0)
                 {
-                    throw new ArgumentException(string.Format("struct unknown value is invalid value {0}", reserved));
+                    throw new Exception(string.Format("struct unknown value is invalid value {0}", reserved));
                 }
-                structs[i].UnkSize = BitConverter.ToInt32(data, structdefsk + 20);
+                s.UnkSize = BitConverter.ToInt32(data, structdefsk + 20);
                 var parent = BitConverter.ToInt32(data, structdefsk + 16);
-                structs[i].Parent = parent == -1 ? null : structs[parent];
+                s.Parent = parent == -1 ? null : structs[parent];
                 var fieldc = BitConverter.ToInt32(data, structdefsk + 12);
                 for (int ii = 0; ii < fieldc; ++ii)
                 {
-                    var field = new IgbField
+                    s.Fields.Add(new IgbFieldInfo
                     {
                         Type = types[BitConverter.ToInt16(data, seek + 0)],
                         UnkOff = BitConverter.ToInt16(data, seek + 2),
                         Size = BitConverter.ToInt16(data, seek + 4)
-                    };
-                    structs[i].Fields.Add(field);
+                    });
                     seek += 6;
                 }
+                structs[i] = s;
 
                 structdefsk += 24;
             }
@@ -113,15 +133,19 @@ namespace igbgui
                 var unk = BitConverter.ToInt32(data, seek+8);
                 if (unk != 0)
                 {
-                    throw new ArgumentException(string.Format("ref unknown value is invalid value {0}", unk));
+                    throw new Exception(string.Format("ref unknown value is invalid value {0}", unk));
                 }
                 if (type == 3)
                 {
-                    var obj = new IgbObject
+                    var s = structs[BitConverter.ToInt32(data, seek + 12)];
+                    dynamic obj;
+                    if (igbStructTypes.ContainsKey(s.Name))
                     {
-                        RefID = i,
-                        Struct = structs[BitConverter.ToInt32(data, seek + 12)]
-                    };
+                        obj = Activator.CreateInstance(igbStructTypes[s.Name], s);
+                    } else
+                    {
+                        obj = new IgbObject(s);
+                    }
                     refs[i] = obj;
                     objs.Add(obj);
                 }
@@ -129,7 +153,6 @@ namespace igbgui
                 {
                     var mem = new IgbMemory
                     {
-                        RefID = i,
                         Type = types[BitConverter.ToInt32(data, seek + 16)],
                         Data = new byte[BitConverter.ToInt32(data, seek + 12)],
                         Unk1 = data[seek + 20],
@@ -140,7 +163,7 @@ namespace igbgui
                 }
                 else
                 {
-                    throw new ArgumentException(string.Format("unknown ref type {0}", type));
+                    throw new Exception(string.Format("unknown ref type {0}", type));
                 }
                 seek += size;
             }
@@ -159,7 +182,7 @@ namespace igbgui
                 var obj = objs[i];
                 if (obj.Struct != structs[BitConverter.ToInt32(data, seek)])
                 {
-                    throw new ArgumentException(string.Format("object {0} struct mismatch", i));
+                    throw new Exception(string.Format("object {0} struct mismatch", i));
                 }
                 var sz = BitConverter.ToInt32(data, seek + 4);
                 obj.Data = new byte[sz - 8];
@@ -182,18 +205,16 @@ namespace igbgui
                 seek += 4;
             }
 
-            return new IGB(version, types, shader_types, shaderval, structs, refs, objs, mems, topobj);
+            return new IGB(version, types, shader_types, shaderval, structs, refs, topobj);
         }
 
-        public IGB(uint version, IEnumerable<IgbType> types, IEnumerable<IgbShaderType> shadertypes, int shaderval, IEnumerable<IgbStruct> structs, IEnumerable<IgbRefType> refs, IEnumerable<IgbObject> objs, IEnumerable<IgbMemory> mems, int top)
+        public IGB(uint version, IEnumerable<IgbType> types, IEnumerable<IgbShaderType> shadertypes, int shaderval, IEnumerable<IgbStruct> structs, IEnumerable<IgbRefType> refs, int top)
         {
             Version = version;
             Types = new(types);
             ShaderTypes = new(shadertypes);
             Structs = new(structs);
             Refs = new(refs);
-            Objects = new(objs);
-            Memorys = new(mems);
 
             ShaderVal = shaderval;
             Top = GetRef<IgbObject>(top);
@@ -205,8 +226,8 @@ namespace igbgui
         public int ShaderVal { get; set; }
         public List<IgbStruct> Structs { get; set; }
         public List<IgbRefType> Refs { get; set; }
-        public List<IgbObject> Objects { get; set; }
-        public List<IgbMemory> Memorys { get; set; }
+        public IEnumerable<IgbObject> Objects => Refs.Where(t => t is IgbObject).Cast<IgbObject>();
+        public IEnumerable<IgbMemory> Memorys => Refs.Where(t => t is IgbMemory).Cast<IgbMemory>();
         public IgbObject Top { get; set; }
 
         public T GetRef<T>(int idx) where T : IgbRefType

@@ -29,7 +29,8 @@ namespace igbgui
         private static readonly Dictionary<string, ShaderInfo> shaderinfos = new()
         {
             { "test", new("test.vert", "default4.frag", func: RenderTest) },
-            { "axes", new("axes.vert", "default4.frag", func: RenderAxes) }
+            { "axes", new("axes.vert", "default4.frag", func: RenderAxes) },
+            { "line", new("line-static.vert", "default4.frag") }
         };
 
         public ShaderInfo Info { get; }
@@ -95,10 +96,11 @@ namespace igbgui
             }
         }
 
-        private static Dictionary<string, Shader> shaders = new();
-        private static Dictionary<string, int> vertshaders = new();
-        private static Dictionary<string, int> fragshaders = new();
+        private static readonly Dictionary<string, Shader> shaders = new();
+        private static readonly Dictionary<string, int> vertshaders = new();
+        private static readonly Dictionary<string, int> fragshaders = new();
 
+        // init shaders. Needs a GL context to be active.
         public static void InitShaders()
         {
             if (shaders.Count != 0)

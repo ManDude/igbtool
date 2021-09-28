@@ -1,4 +1,5 @@
 ﻿using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 
@@ -8,7 +9,7 @@ namespace igbgui
     {
         public int ID { get; }
 
-        public Dictionary<string, int> Buffers { get; } = new();
+        private Dictionary<string, int> Buffers { get; } = new();
 
         public Shader Shader { get; }
 
@@ -31,18 +32,13 @@ namespace igbgui
             };
         }
 
-        public VAO(string shadername, PrimitiveType prim, float[] positions = null, float[] colors = null)
+        public VAO(string shadername, PrimitiveType prim)
         {
             Shader = Shader.GetShader(shadername);
             Primitive = prim;
 
             // Create the vertex array object (VAO) for the program.
             ID = GL.GenVertexArray();
-
-            if (positions != null)
-                UpdatePositions(positions);
-            if (colors != null)
-                UpdateColors(colors);
         }
 
         public void UpdateAttrib<T>(string name, T[] data, int eltsize, int eltcount) where T : struct
@@ -73,10 +69,22 @@ namespace igbgui
             VertCount = positions.Length / 4;
         }
 
+        public void UpdatePositions(Vector4[] positions)
+        {
+            UpdateAttrib("position", positions, 16, 4);
+            VertCount = positions.Length;
+        }
+
         public void UpdateColors(float[] colors)
         {
             UpdateAttrib("color", colors, sizeof(float), 4);
             VertCount = colors.Length / 4;
+        }
+
+        public void UpdateColors(Color4[] colors)
+        {
+            UpdateAttrib("color", colors, 16, 4);
+            VertCount = colors.Length;
         }
 
         ~VAO()

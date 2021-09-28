@@ -397,15 +397,15 @@ std::string IgbFile::print_structs() {
     if (cls.is_master)
       out += fmt::format(" (master)");
     out += "\n";
-    // out += fmt::format("Unknown: {}\n", cls.u_val1);
+    // out += fmt::format("    Unknown: {}\n", cls.u_val1);
     if (cls.parent != -1) {
-      out += fmt::format("Parent: {}\n", structs[cls.parent].name);
+      out += fmt::format("    Parent: {}\n", structs[cls.parent].name);
     }
-    out += fmt::format("Unknown: {}\n", cls.u_val2);
-    out += fmt::format("Fields: {}\n", cls.field_count);
+    out += fmt::format("    Unknown: {}\n", cls.u_val2);
+    out += fmt::format("    Fields: {}\n", cls.field_count);
     for (int j = 0; j < cls.field_count; ++j) {
       auto& field = cls.fields.at(j);
-      out += fmt::format("    {} ({} bytes) [??: {}]\n", field.type->name, field.size, field.unk);
+      out += fmt::format("        {} ({} bytes) [??: {}]\n", field.type->name, field.size, field.unk);
     }
   }
   return out;

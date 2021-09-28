@@ -4,6 +4,9 @@
     <Compile Update="3D\GLViewer.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Update="IGBViewer.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Update="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
