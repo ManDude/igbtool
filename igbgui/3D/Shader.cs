@@ -30,7 +30,8 @@ namespace igbgui
         {
             { "test", new("test.vert", "default4.frag", func: RenderTest) },
             { "axes", new("axes.vert", "default4.frag", func: RenderAxes) },
-            { "line", new("line-static.vert", "default4.frag") }
+            { "line", new("line-static.vert", "default4.frag") },
+            { "line-model", new("line-model.vert", "default4.frag", func: RenderLineModel) }
         };
 
         public ShaderInfo Info { get; }

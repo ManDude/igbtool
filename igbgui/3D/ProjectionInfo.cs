@@ -10,7 +10,12 @@ namespace igbgui
 
         public Matrix4 Perspective;
         public Matrix4 View;
-        // public Matrix4 Model;
+
+        // these can be whatever you want
+        public Vector3 UserTrans;
+        public Vector3 UserRot;
+        public Vector3 UserScale;
+        public Quaternion UserQuat;
 
         public float Width;
         public float Height;

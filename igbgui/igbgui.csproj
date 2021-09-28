@@ -9,12 +9,14 @@
   <ItemGroup>
     <None Remove="Shaders\axes.vert" />
     <None Remove="Shaders\default4.frag" />
+    <None Remove="Shaders\line-model.vert" />
     <None Remove="Shaders\line-static.vert" />
     <None Remove="Shaders\test.vert" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Shaders\default4.frag" />
+    <EmbeddedResource Include="Shaders\line-model.vert" />
     <EmbeddedResource Include="Shaders\line-static.vert" />
     <EmbeddedResource Include="Shaders\axes.vert" />
     <EmbeddedResource Include="Shaders\test.vert" />

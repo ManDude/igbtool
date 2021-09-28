@@ -218,6 +218,34 @@ namespace igbgui
 
             ShaderVal = shaderval;
             Top = GetRef<IgbObject>(top);
+
+            foreach (var r in Refs)
+            {
+                if (r is IgbObject obj)
+                {
+                    obj.IGB = this;
+                }
+            }
+            foreach (var r in Refs)
+            {
+                if (r is IgbObject obj)
+                {
+                    if (obj.GetType() != typeof(IgbObject))
+                    {
+                        var allfields = obj.GetType().GetFields();
+                        foreach (var f in allfields.Where(f => f.FieldType == typeof(Types.igMemoryRefMetaField)))
+                        {
+                            var fieldref = (Types.igMemoryRefMetaField)f.GetValue(obj);
+                            fieldref.GetVal();
+                        }
+                        foreach (var f in allfields.Where(f => f.FieldType.IsGenericType && f.FieldType.GetGenericTypeDefinition() == typeof(Types.igObjectRefMetaField<>)))
+                        {
+                            dynamic fieldref = f.GetValue(obj);
+                            fieldref.GetVal();
+                        }
+                    }
+                }
+            }
         }
 
         public uint Version { get; set; }

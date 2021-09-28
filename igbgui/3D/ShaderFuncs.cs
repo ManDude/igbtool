@@ -18,7 +18,7 @@ namespace igbgui
 
         internal static void RenderTest(Shader sh, RenderInfo ri)
         {
-            Matrix4 model = Matrix4.CreateScale(2) * Matrix4.CreateTranslation(0, (float)Math.Sin(ri.CurrentFrame / 60f * Math.PI / 2) * 0.25f, -3);
+            Matrix4 model = Matrix4.CreateScale(2) * Matrix4.CreateTranslation(0, (float)Math.Sin(ri.CurrentFrame / 60f * Math.PI / 2) * 0.25f, -5);
 
             sh.UniformMatrix4("modelMatrix", ref model);
         }
@@ -28,6 +28,15 @@ namespace igbgui
             Vector4 trans = Matrix4.CreateFromQuaternion(new Quaternion(ri.Projection.Rot)) * new Vector4(0, 0, -ri.Distance, 1);
 
             sh.UniformVec4("trans", ref trans);
+        }
+
+        internal static void RenderLineModel(Shader sh, RenderInfo ri)
+        {
+            Matrix4 model = Matrix4.CreateFromQuaternion(ri.Projection.UserQuat);
+
+            sh.UniformVec3("trans", ref ri.Projection.UserTrans);
+            sh.UniformVec3("scale", ref ri.Projection.UserScale);
+            sh.UniformMatrix4("modelMatrix", ref model);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Threading.Tasks;
+using OpenTK.Mathematics;
 
 namespace igbgui
 {
@@ -64,7 +65,7 @@ namespace igbgui
         {
             Distance = InitialDistance;
             Projection.Trans = new(0, 0, -Distance);
-            Projection.Rot = new(0);
+            Projection.Rot = new(0, 0, 0);
             Projection.Scale = new(1);
         }
 

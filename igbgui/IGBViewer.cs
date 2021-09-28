@@ -11,8 +11,51 @@ namespace igbgui
         private IGBRetFuncDelegate igb;
 
         private VAO vaoLines;
+        private VAO vaoLineModel;
+        private VAO vaoLineStrip;
 
-        public IGBViewer(GLControlSettings settings, IGBRetFuncDelegate igbgetter) : base(settings)
+        private Vector4[] boxVerts = new Vector4[24] {
+            // sides
+            new Vector4(-1, -1, -1, 1),
+            new Vector4(-1, +1, -1, 1),
+
+            new Vector4(+1, -1, -1, 1),
+            new Vector4(+1, +1, -1, 1),
+
+            new Vector4(+1, -1, +1, 1),
+            new Vector4(+1, +1, +1, 1),
+
+            new Vector4(-1, -1, +1, 1),
+            new Vector4(-1, +1, +1, 1),
+
+            // bottom
+            new Vector4(-1, -1, -1, 1),
+            new Vector4(+1, -1, -1, 1),
+
+            new Vector4(+1, -1, -1, 1),
+            new Vector4(+1, -1, +1, 1),
+
+            new Vector4(+1, -1, +1, 1),
+            new Vector4(-1, -1, +1, 1),
+
+            new Vector4(-1, -1, +1, 1),
+            new Vector4(-1, -1, -1, 1),
+
+            // top
+            new Vector4(-1, +1, -1, 1),
+            new Vector4(+1, +1, -1, 1),
+
+            new Vector4(+1, +1, -1, 1),
+            new Vector4(+1, +1, +1, 1),
+
+            new Vector4(+1, +1, +1, 1),
+            new Vector4(-1, +1, +1, 1),
+
+            new Vector4(-1, +1, +1, 1),
+            new Vector4(-1, +1, -1, 1)
+        };
+
+    public IGBViewer(GLControlSettings settings, IGBRetFuncDelegate igbgetter) : base(settings)
         {
             igb = igbgetter;
         }
@@ -22,6 +65,8 @@ namespace igbgui
             base.OnLoad(e);
 
             vaoLines = new("line", PrimitiveType.Lines);
+            vaoLineModel = new("line-model", PrimitiveType.Lines);
+            vaoLineStrip = new("line", PrimitiveType.LineStrip);
         }
 
         protected override void Render()
@@ -66,11 +111,28 @@ namespace igbgui
                             var cols = new Color4[12 * 2];
                             for (int i = 0; i < cols.Length; ++i)
                             {
-                                cols[i] = new Color4(1, 0, 0, 1f);
+                                cols[i] = new Color4(.5f, 0, 0, 1f);
                             }
                             vaoLines.UpdatePositions(verts);
                             vaoLines.UpdateColors(cols);
                             vaoLines.Render(render);
+                        }
+                        else if (obj is PhantomOBB obb)
+                        {
+                            var pos = obb.Pos.Value;
+                            var size = obb.Size.Value;
+                            var rot = obb.Quat.Value;
+                            var cols = new Color4[12 * 2];
+                            for (int i = 0; i < cols.Length; ++i)
+                            {
+                                cols[i] = new Color4(0, .5f, .5f, 1f);
+                            }
+                            render.Projection.UserTrans = pos;
+                            render.Projection.UserScale = size;
+                            render.Projection.UserQuat = new Quaternion(rot.X, rot.Z, rot.Y, rot.W);
+                            vaoLineModel.UpdatePositions(boxVerts);
+                            vaoLineModel.UpdateColors(cols);
+                            vaoLineModel.Render(render);
                         }
                     }
                 }

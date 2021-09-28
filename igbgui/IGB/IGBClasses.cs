@@ -47,57 +47,71 @@ namespace igbgui
             }
         }
 
-        public int ReadInt(byte[] data) => BitConverter.ToInt32(data, Offset);
-        public string ReadString(byte[] data) => Encoding.UTF8.GetString(data, Offset+4, BitConverter.ToInt32(data, Offset)).TrimNull();
-        public float ReadFloat(byte[] data) => BitConverter.ToSingle(data, Offset);
-        public Vector3 ReadVec3f(byte[] data)
+        protected bool ReadBool() => BitConverter.ToBoolean(Parent.Data, Offset);
+        protected int ReadInt() => BitConverter.ToInt32(Parent.Data, Offset);
+        protected string ReadString() => Encoding.UTF8.GetString(Parent.Data, Offset+4, BitConverter.ToInt32(Parent.Data, Offset)).TrimNull();
+        protected float ReadFloat() => BitConverter.ToSingle(Parent.Data, Offset);
+        protected IgbMemory ReadMemRef() => Parent.IGB.GetRef<IgbMemory>(BitConverter.ToInt32(Parent.Data, Offset));
+        protected IgbObject ReadObjRef() => Parent.IGB.GetRef<IgbObject>(BitConverter.ToInt32(Parent.Data, Offset));
+        protected Vector3 ReadVec3f()
         {
             var ofs = Offset;
-            return new Vector3(BitConverter.ToSingle(data, ofs + 0), BitConverter.ToSingle(data, ofs + 4), BitConverter.ToSingle(data, ofs + 8));
+            return new Vector3(BitConverter.ToSingle(Parent.Data, ofs + 0), BitConverter.ToSingle(Parent.Data, ofs + 4), BitConverter.ToSingle(Parent.Data, ofs + 8));
         }
-        public Vector4 ReadVec4f(byte[] data)
+        protected Vector4 ReadVec4f()
         {
             var ofs = Offset;
-            return new Vector4(BitConverter.ToSingle(data, ofs + 0), BitConverter.ToSingle(data, ofs + 4), BitConverter.ToSingle(data, ofs + 8), BitConverter.ToSingle(data, ofs + 12));
+            return new Vector4(BitConverter.ToSingle(Parent.Data, ofs + 0), BitConverter.ToSingle(Parent.Data, ofs + 4), BitConverter.ToSingle(Parent.Data, ofs + 8), BitConverter.ToSingle(Parent.Data, ofs + 12));
         }
-        public void Write(byte[] data, int val) => BitUtils.WriteBytes(data, Offset, val);
-        public void Write(byte[] data, Vector3 val)
+        protected void Write(bool val) => BitUtils.WriteBytes(Parent.Data, Offset, val);
+        protected void Write(byte val) => BitUtils.WriteBytes(Parent.Data, Offset, val);
+        protected void Write(sbyte val) => BitUtils.WriteBytes(Parent.Data, Offset, val);
+        protected void Write(short val) => BitUtils.WriteBytes(Parent.Data, Offset, val);
+        protected void Write(ushort val) => BitUtils.WriteBytes(Parent.Data, Offset, val);
+        protected void Write(int val) => BitUtils.WriteBytes(Parent.Data, Offset, val);
+        protected void Write(uint val) => BitUtils.WriteBytes(Parent.Data, Offset, val);
+        protected void Write(long val) => BitUtils.WriteBytes(Parent.Data, Offset, val);
+        protected void Write(ulong val) => BitUtils.WriteBytes(Parent.Data, Offset, val);
+        protected void Write(float val) => BitUtils.WriteBytes(Parent.Data, Offset, val);
+        protected void Write(double val) => BitUtils.WriteBytes(Parent.Data, Offset, val);
+        protected void Write(IgbRefType val) => BitUtils.WriteBytes(Parent.Data, Offset, Parent.IGB.Refs.IndexOf(val));
+        protected void Write(Vector3 val)
         {
             var ofs = Offset;
-            BitUtils.WriteBytes(data, ofs+0, val.X);
-            BitUtils.WriteBytes(data, ofs+4, val.Y);
-            BitUtils.WriteBytes(data, ofs+8, val.Z);
+            BitUtils.WriteBytes(Parent.Data, ofs+0, val.X);
+            BitUtils.WriteBytes(Parent.Data, ofs+4, val.Y);
+            BitUtils.WriteBytes(Parent.Data, ofs+8, val.Z);
         }
-        public void Write(byte[] data, Vector4 val)
+        protected void Write(Vector4 val)
         {
             var ofs = Offset;
-            BitUtils.WriteBytes(data, ofs + 0, val.X);
-            BitUtils.WriteBytes(data, ofs + 4, val.Y);
-            BitUtils.WriteBytes(data, ofs + 8, val.Z);
-            BitUtils.WriteBytes(data, ofs + 12, val.W);
+            BitUtils.WriteBytes(Parent.Data, ofs + 0, val.X);
+            BitUtils.WriteBytes(Parent.Data, ofs + 4, val.Y);
+            BitUtils.WriteBytes(Parent.Data, ofs + 8, val.Z);
+            BitUtils.WriteBytes(Parent.Data, ofs + 12, val.W);
         }
-        public void Write(byte[] data, string val)
+        protected void Write(string val)
         {
             // this fucking sucks
+            var ofs = Offset;
             var len = Encoding.UTF8.GetByteCount(val);
-            var oldlen = ReadInt(data);
+            var oldlen = ReadInt();
             var alen = BitUtils.Align(len, 4);
             var aoldlen = BitUtils.Align(oldlen, 4);
-            var ofs = Offset;
             if (alen < aoldlen)
             {
                 // new string is shorter
-                Array.Copy(data, ofs + aoldlen, data, ofs + alen, data.Length - (ofs + aoldlen));
-                Array.Resize(ref data, data.Length - (aoldlen - alen));
+                Array.Copy(Parent.Data, ofs + aoldlen, Parent.Data, ofs + alen, Parent.Data.Length - (ofs + aoldlen));
+                Parent.Resize(Parent.Data.Length - (aoldlen - alen));
             }
             else if (alen > aoldlen)
             {
                 // new string is longer
-                Array.Resize(ref data, data.Length - (aoldlen - alen));
-                Array.Copy(data, ofs + aoldlen, data, ofs + alen, data.Length - (ofs + aoldlen));
+                Parent.Resize(Parent.Data.Length - (aoldlen - alen));
+                Array.Copy(Parent.Data, ofs + aoldlen, Parent.Data, ofs + alen, Parent.Data.Length - (ofs + aoldlen));
             }
-            BitUtils.WriteBytes(data, ofs, len);
-            BitUtils.WriteBytes(data, ofs+4, val);
+            BitUtils.WriteBytes(Parent.Data, ofs, len);
+            BitUtils.WriteBytes(Parent.Data, ofs+4, val);
         }
 
         public IgbField() { }
@@ -106,10 +120,12 @@ namespace igbgui
             Parent = parent;
             Index = index;
 
-            var src_field = Parent.Struct.Fields[index];
-            if (src_field.Type.Name != GetType().Name)
+            var this_t = GetType();
+            var src_type = Parent.Struct.Fields[index].Type.Name;
+            var new_type = this_t.IsGenericType ? this_t.Name.Remove(this_t.Name.IndexOf('`')) : this_t.Name;
+            if (src_type != new_type)
             {
-                throw new Exception(string.Format("field type mismatch on {2}: {0} vs. {1}", src_field.Type.Name, GetType().Name, Parent.GetType().Name));
+                throw new Exception(string.Format("field type mismatch on {2}: {0} vs. {1}", src_type, new_type, Parent.GetType().Name));
             }
         }
     }
@@ -132,6 +148,14 @@ namespace igbgui
     {
         public IgbStruct Struct { get; }
         public byte[] Data { get; set; }
+
+        public IGB IGB { get; set; }
+
+        public void Resize(int sz)
+        {
+            var data = Data;
+            Array.Resize(ref data, sz);
+        }
 
         public IgbObject(IgbStruct s)
         {
