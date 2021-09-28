@@ -1,5 +1,3 @@
-# igbtool
- 
 **igbtool** is a project for utilities to handle .IGB (Intrinsic Graphics binary) files used for *Crash Nitro Kart* (PS2, XBOX, GCN). It may work on other games' files, but this is not tested.
 
 There are actually two programs in this repo:
