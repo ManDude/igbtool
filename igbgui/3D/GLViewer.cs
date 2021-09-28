@@ -59,7 +59,7 @@ namespace igbgui
         private bool mouseleft = false;
         private int mousex = 0;
         private int mousey = 0;
-        private float movespeed = 5f;
+        private float movespeed = 10f;
         private float rotspeed = 0.5f;
 
         private const float PerFrame = 1f / 60f;
@@ -257,17 +257,17 @@ namespace igbgui
             {
                 if (mouseleft)
                 {
-                    float roty = render.Projection.Rot.X;
-                    float rotx = render.Projection.Rot.Y;
-                    rotx += MathHelper.DegreesToRadians(e.X - mousex) * rotspeed;
-                    roty += MathHelper.DegreesToRadians(e.Y - mousey) * rotspeed;
-                    // rotx %= 360;
-                    if (roty > MathHelper.PiOver2)
-                        roty = MathHelper.PiOver2;
-                    if (roty < -MathHelper.PiOver2)
-                        roty = -MathHelper.PiOver2;
-                    render.Projection.Rot.X = roty;
-                    render.Projection.Rot.Y = rotx;
+                    float rotx = render.Projection.Rot.X;
+                    float rotz = render.Projection.Rot.Z;
+                    rotz += MathHelper.DegreesToRadians(e.X - mousex) * rotspeed;
+                    rotx += MathHelper.DegreesToRadians(e.Y - mousey) * rotspeed;
+                    // roty %= 360;
+                    if (rotx > RenderInfo.MaxRot)
+                        rotx = RenderInfo.MaxRot;
+                    if (rotx < RenderInfo.MinRot)
+                        rotx = RenderInfo.MinRot;
+                    render.Projection.Rot.X = rotx;
+                    render.Projection.Rot.Z = rotz;
                 }
                 else if (mouseright)
                 {

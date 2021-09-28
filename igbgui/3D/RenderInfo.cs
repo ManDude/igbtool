@@ -9,10 +9,22 @@ namespace igbgui
         public ProjectionInfo Projection;
 
         public const float InitialDistance = 10;
-        public const float MinDistance = 1;
-        public const float MaxDistance = 30;
+        public const float MinDistance = 2;
+        public const float MaxDistance = 40;
+
+        public const float BaseRot = -MathHelper.PiOver2;
+        public const float MinRot = BaseRot - MathHelper.PiOver2;
+        public const float MaxRot = BaseRot + MathHelper.PiOver2;
 
         public float Distance { get; set; }
+
+        public void Reset()
+        {
+            Distance = InitialDistance;
+            Projection.Trans = new(0, 0, -Distance);
+            Projection.Rot = new(BaseRot, 0, 0);
+            Projection.Scale = new(1);
+        }
 
         private long _framecounter;
         private long _framehits;
@@ -59,14 +71,6 @@ namespace igbgui
         public void Start()
         {
             _frametask.Start();
-        }
-
-        public void Reset()
-        {
-            Distance = InitialDistance;
-            Projection.Trans = new(0, 0, -Distance);
-            Projection.Rot = new(0, 0, 0);
-            Projection.Scale = new(1);
         }
 
         ~RenderInfo()
