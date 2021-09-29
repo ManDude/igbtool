@@ -17,8 +17,7 @@ namespace igbgui
         public Vector3 UserRot;
         public Vector3 UserScale;
         public Quaternion UserQuat;
-        public Vector3 UserVec3;
-        public Vector4 UserVec4;
+        public Vector4 UserAxis;
         public Color4 UserColor1;
         public Color4 UserColor2;
 

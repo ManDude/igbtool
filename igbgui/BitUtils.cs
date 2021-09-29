@@ -33,5 +33,6 @@ namespace igbgui
         public static Vector3 ReadVec3f(byte[] data, int offset) => new Vector3(ReadFloat(data, offset + 0), ReadFloat(data, offset + 4), ReadFloat(data, offset + 8));
         public static Vector4 ReadVec4f(byte[] data, int offset) => new Vector4(ReadFloat(data, offset + 0), ReadFloat(data, offset + 4), ReadFloat(data, offset + 8), ReadFloat(data, offset + 12));
         public static CrystalData ReadCrystalData(byte[] data, int offset) => new CrystalData(data, offset);
+        public static CNKLetterData ReadCNKLetterData(byte[] data, int offset) => new CNKLetterData(data, offset);
     }
 }

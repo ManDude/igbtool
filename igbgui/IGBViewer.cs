@@ -90,7 +90,7 @@ namespace igbgui
                         }
                         render.Projection.UserTrans = pos;
                         render.Projection.UserScale = size;
-                        render.Projection.UserVec4 = new Vector4(1, 0, 0, 0);
+                        render.Projection.UserAxis = new Vector4(1, 0, 0, 0);
                         vaoLineModel.UpdatePositions(boxVerts);
                         vaoLineModel.UpdateColors(cols);
                         vaoLineModel.Render(render);
@@ -107,7 +107,7 @@ namespace igbgui
                         }
                         render.Projection.UserTrans = pos;
                         render.Projection.UserScale = size;
-                        render.Projection.UserVec4 = rot;
+                        render.Projection.UserAxis = rot;
                         vaoLineModel.UpdatePositions(boxVerts);
                         vaoLineModel.UpdateColors(cols);
                         vaoLineModel.Render(render);
@@ -131,7 +131,7 @@ namespace igbgui
                         {
                             render.Projection.PushColorMode(ProjectionInfo.ColorModeEnum.GradientY);
                             render.Projection.UserTrans = pos_list[i];
-                            render.Projection.UserVec4 = rot_list[i];
+                            render.Projection.UserAxis = rot_list[i];
                             vaoSphereLine.Render(render);
                         }
                     }
@@ -145,7 +145,7 @@ namespace igbgui
                             render.Projection.PushColorMode(ProjectionInfo.ColorModeEnum.GradientY);
                             render.Projection.UserTrans = portal.Pos.Value;
                             render.Projection.UserScale = portal.Size.Value;
-                            render.Projection.UserVec4 = portal.Rot.Value;
+                            render.Projection.UserAxis = portal.Rot.Value;
                             vaoSphereLine.Render(render);
                         }
                     }
@@ -159,7 +159,21 @@ namespace igbgui
                         {
                             render.Projection.PushColorMode(ProjectionInfo.ColorModeEnum.GradientY);
                             render.Projection.UserTrans = crystal.Pos;
-                            render.Projection.UserVec4 = crystal.Rot;
+                            render.Projection.UserAxis = crystal.Rot;
+                            vaoSphereLine.Render(render);
+                        }
+                    }
+                    else if (obj is LevelInfoCNKLetter info_letter)
+                    {
+                        MakeLineSphere(3);
+                        render.Projection.UserColor1 = Color4.Yellow;
+                        render.Projection.UserColor2 = Color4.White;
+                        render.Projection.UserScale = new(2);
+                        foreach (var letter in info_letter.CNKLetterList.Value.GetList())
+                        {
+                            render.Projection.PushColorMode(ProjectionInfo.ColorModeEnum.GradientY);
+                            render.Projection.UserTrans = letter.Pos;
+                            render.Projection.UserAxis = letter.Rot;
                             vaoSphereLine.Render(render);
                         }
                     }
