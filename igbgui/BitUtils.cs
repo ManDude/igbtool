@@ -1,6 +1,7 @@
-﻿using System;
-using System.Text;
+﻿using igbgui.Structs;
 using OpenTK.Mathematics;
+using System;
+using System.Text;
 
 namespace igbgui
 {
@@ -31,5 +32,6 @@ namespace igbgui
         public static string ReadString(byte[] data, int offset) => Encoding.UTF8.GetString(data, offset+4, ReadInt(data, offset));
         public static Vector3 ReadVec3f(byte[] data, int offset) => new Vector3(ReadFloat(data, offset + 0), ReadFloat(data, offset + 4), ReadFloat(data, offset + 8));
         public static Vector4 ReadVec4f(byte[] data, int offset) => new Vector4(ReadFloat(data, offset + 0), ReadFloat(data, offset + 4), ReadFloat(data, offset + 8), ReadFloat(data, offset + 12));
+        public static CrystalData ReadCrystalData(byte[] data, int offset) => new CrystalData(data, offset);
     }
 }

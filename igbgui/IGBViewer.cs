@@ -149,6 +149,20 @@ namespace igbgui
                             vaoSphereLine.Render(render);
                         }
                     }
+                    else if (obj is LevelInfoCrystal info_crystal)
+                    {
+                        MakeLineSphere(3);
+                        render.Projection.UserColor1 = Color4.Magenta;
+                        render.Projection.UserColor2 = Color4.White;
+                        render.Projection.UserScale = new(2);
+                        foreach (var crystal in info_crystal.CrystalList.Value.GetList())
+                        {
+                            render.Projection.PushColorMode(ProjectionInfo.ColorModeEnum.GradientY);
+                            render.Projection.UserTrans = crystal.Pos;
+                            render.Projection.UserVec4 = crystal.Rot;
+                            vaoSphereLine.Render(render);
+                        }
+                    }
                     /*else if (obj is vvSplineObj spline)
                     {
                         RenderSpline(spline, Color4.White);
