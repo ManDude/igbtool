@@ -10,17 +10,17 @@ namespace igbgui
     public sealed class IGB
     {
         private static Dictionary<string, Type> igbFieldTypes = new();
-        private static Dictionary<string, Type> igbStructTypes = new();
+        private static Dictionary<string, Type> igbObjectTypes = new();
         static IGB()
         {
             var q = from t in Assembly.GetExecutingAssembly().GetTypes()
-                    where t.IsClass && t.Namespace == "igbgui.Types"
+                    where t.IsClass && t.Namespace == "igbgui.Fields"
                     select t;
             q.ToList().ForEach(t => igbFieldTypes.Add(t.IsGenericType ? t.Name.Remove(t.Name.IndexOf('`')) : t.Name, t));
             q = from t in Assembly.GetExecutingAssembly().GetTypes()
-                    where t.IsClass && t.Namespace == "igbgui.Structs"
+                    where t.IsClass && t.Namespace == "igbgui.Objects"
                     select t;
-            q.ToList().ForEach(t => igbStructTypes.Add(t.IsGenericType ? t.Name.Remove(t.Name.IndexOf('`')) : t.Name, t));
+            q.ToList().ForEach(t => igbObjectTypes.Add(t.IsGenericType ? t.Name.Remove(t.Name.IndexOf('`')) : t.Name, t));
         }
 
         public static IGB Load(byte[] data)
@@ -240,9 +240,9 @@ namespace igbgui
                     break;
                 }
             }
-            if (res is IgbObjectRef objref && igbStructTypes.ContainsKey(objref.Struct.Name) && typeof(T).IsSubclassOf(typeof(IgbObject)))
+            if (res is IgbObjectRef objref && igbObjectTypes.ContainsKey(objref.Struct.Name) && typeof(T).IsSubclassOf(typeof(IgbObject)))
             {
-                var type = igbStructTypes[objref.Struct.Name];
+                var type = igbObjectTypes[objref.Struct.Name];
                 if (type.Name == typeof(T).Name || type.IsSubclassOf(typeof(T)))
                 {
                     Refs.Remove(res);

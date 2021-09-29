@@ -14,6 +14,9 @@ namespace igbgui
             sh.UniformMatrix4("projectionMatrix", ref ri.Projection.Perspective);
             sh.UniformMatrix4("viewMatrix", ref ri.Projection.View);
             sh.UniformVec3("viewTrans", ref ri.Projection.Trans);
+            sh.UniformVec4("userColor1", ref ri.Projection.UserColor1);
+            sh.UniformVec4("userColor2", ref ri.Projection.UserColor2);
+            sh.UniformInt("colorMode", (int)ri.Projection.ColorMode);
         }
 
         internal static void RenderTest(Shader sh, RenderInfo ri)

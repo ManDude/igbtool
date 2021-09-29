@@ -65,19 +65,16 @@ namespace igbgui
         public void UniformMatrix4(string var_name, ref Matrix4 mat) => GL.UniformMatrix4(GL.GetUniformLocation(ID, var_name), false, ref mat);
         public void UniformVec3(string var_name, ref Vector3 vec) => GL.Uniform3(GL.GetUniformLocation(ID, var_name), vec.X, vec.Y, vec.Z);
         public void UniformVec4(string var_name, ref Vector4 vec) => GL.Uniform4(GL.GetUniformLocation(ID, var_name), vec.X, vec.Y, vec.Z, vec.W);
+        public void UniformVec4(string var_name, ref Color4 col) => GL.Uniform4(GL.GetUniformLocation(ID, var_name), col.R, col.G, col.B, col.A);
+        public void UniformInt(string var_name, int val) => GL.Uniform1(GL.GetUniformLocation(ID, var_name), val);
 
-        public void PreRender(RenderInfo ri)
+        public void Render(RenderInfo ri)
         {
             GL.UseProgram(ID);
             if (Info.PreRenderFunc == null)
                 PreRenderDefault(this, ri);
             else
                 Info.PreRenderFunc(this, ri);
-        }
-
-        public void Render(RenderInfo ri)
-        {
-            GL.UseProgram(ID);
             if (Info.RenderFunc == null)
                 RenderDefault(this, ri);
             else
@@ -87,14 +84,6 @@ namespace igbgui
         public static Shader GetShader(string name)
         {
             return shaders[name];
-        }
-
-        public static void PrepareShaders(RenderInfo ri)
-        {
-            foreach (var shader in shaders.Values)
-            {
-                shader.PreRender(ri);
-            }
         }
 
         private static readonly Dictionary<string, Shader> shaders = new();

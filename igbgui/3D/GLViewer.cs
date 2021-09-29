@@ -29,7 +29,6 @@ namespace igbgui
             0, 0, 1, 1
         };
         protected Vector4[] SpherePos;
-        protected Color4[] SphereCol;
         protected VAO vaoSphereLine;
 
         protected readonly RenderInfo render;
@@ -37,7 +36,6 @@ namespace igbgui
         private VAO vaoAxes;
         private VAO vaoText;
 
-        private Timer frametimer;
         private bool run = false;
 
         private readonly HashSet<Keys> keysdown = new();
@@ -53,7 +51,7 @@ namespace igbgui
 
         private const float PerFrame = 1f / 60f;
 
-        protected void MakeLineSphere(int resolution, Color4 col1, Color4 col2)
+        protected void MakeLineSphere(int resolution)
         {
             if (resolution < 0)
                 throw new ArgumentOutOfRangeException(nameof(resolution), "Sphere resolution cannot be less than 0.");
@@ -101,29 +99,10 @@ namespace igbgui
                 }
             }
             vaoSphereLine.UpdatePositions(SpherePos);
-
-            MakeLineSphereColor(col1, col2);
-        }
-        protected void MakeLineSphereColor(Color4 col1, Color4 col2)
-        {
-            SphereCol = new Color4[SpherePos.Length];
-            for (int i = 0; i < SphereCol.Length; ++i)
-            {
-                SphereCol[i] = Color4Ext.Lerp(col1, col2, (SpherePos[i].Y+1)/2);
-            }
-            vaoSphereLine.UpdateColors(SphereCol);
         }
 
         public GLViewer(GLControlSettings settings) : base(settings)
         {
-            // window update
-            frametimer = new();
-            frametimer.Interval = 10;
-            frametimer.Tick += (sender, e) =>
-            {
-                Invalidate();
-            };
-
             render = new RenderInfo(this);
         }
 
@@ -166,13 +145,11 @@ namespace igbgui
             vaoAxes.UpdateColors(AxesCol);
 
             vaoSphereLine = new VAO("line-model", PrimitiveType.LineStrip);
-            MakeLineSphere(4, Color4.Yellow, Color4.Red);
+            MakeLineSphere(4);
 
             // set the clear color to black
             GL.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-            // enable window timer
-            frametimer.Enabled = true;
             // enable logic
             run = true;
         }
@@ -191,8 +168,6 @@ namespace igbgui
 
                 render.Projection.Perspective = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45), render.Projection.Aspect, 0.05f, 20000);
                 render.Projection.View = Matrix4.CreateTranslation(render.Projection.Trans) * Matrix4.CreateFromQuaternion(new Quaternion(render.Projection.Rot));
-
-                Shader.PrepareShaders(render);
 
                 // render
                 Render();
@@ -326,8 +301,6 @@ namespace igbgui
 
         protected override void Dispose(bool disposing)
         {
-            frametimer.Enabled = false;
-            frametimer = null;
             base.Dispose(disposing);
         }
 
@@ -339,8 +312,6 @@ namespace igbgui
             GL.UseProgram(0);
 
             // Delete all the resources.
-            vaoAxes = null;
-            vaoText = null;
             Shader.KillShaders();
         }
     }

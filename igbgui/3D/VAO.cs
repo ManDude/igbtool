@@ -104,6 +104,11 @@ namespace igbgui
 
             // This draws the triangle.
             GL.DrawArrays(Primitive, 0, VertCount);
+
+            if (ri.Projection.ColorModeStack.Count > 0)
+            {
+                ri.Projection.PopColorMode();
+            }
         }
     }
 }

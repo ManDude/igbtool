@@ -1,4 +1,5 @@
 ﻿using OpenTK.Mathematics;
+using System.Collections.Generic;
 
 namespace igbgui
 {
@@ -18,6 +19,21 @@ namespace igbgui
         public Quaternion UserQuat;
         public Vector3 UserVec3;
         public Vector4 UserVec4;
+        public Color4 UserColor1;
+        public Color4 UserColor2;
+
+        public enum ColorModeEnum { Default = 0, GradientY = 1, Plain = 2 };
+        public ColorModeEnum ColorMode;
+        public Stack<ColorModeEnum> ColorModeStack;
+        public void PushColorMode(ColorModeEnum mode)
+        {
+            ColorModeStack.Push(ColorMode);
+            ColorMode = mode;
+        }
+        public void PopColorMode()
+        {
+            ColorMode = ColorModeStack.Pop();
+        }
 
         public float Width;
         public float Height;

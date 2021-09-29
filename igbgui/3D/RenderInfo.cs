@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using OpenTK.Mathematics;
 
 namespace igbgui
@@ -26,10 +27,11 @@ namespace igbgui
             Projection.Scale = new(1);
         }
 
+        private bool masterexit;
         private long _framecounter;
         private long _framehits;
         private readonly Task _frametask;
-        private bool masterexit;
+        private readonly Timer _frametimer;
 
         public long MissedFrames => _framecounter - _framehits;
         public long CurrentFrame => _framehits;
@@ -39,6 +41,15 @@ namespace igbgui
 
         public RenderInfo(GLViewer parent = null)
         {
+            // window update
+            _frametimer = new();
+            _frametimer.Interval = 10;
+            _frametimer.Tick += (sender, e) =>
+            {
+                parent?.Invalidate();
+                _frametimer.Enabled = !masterexit;
+            };
+
             // logic update
             _frametask = new(() =>
             {
@@ -63,6 +74,8 @@ namespace igbgui
                 }
             });
 
+            Projection.ColorModeStack = new();
+
             Reset();
 
             Start();
@@ -71,6 +84,7 @@ namespace igbgui
         public void Start()
         {
             _frametask.Start();
+            _frametimer.Enabled = true;
         }
 
         ~RenderInfo()
