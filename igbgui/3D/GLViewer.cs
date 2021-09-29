@@ -28,7 +28,8 @@ namespace igbgui
             0, 0, 1, 1,
             0, 0, 1, 1
         };
-        protected Vector4[] SpherePos;
+        private readonly Dictionary<int, Vector4[]> SpherePosCache = new();
+        private int SpherePosLastUploaded = -1;
         protected VAO vaoSphereLine;
 
         protected readonly RenderInfo render;
@@ -55,50 +56,56 @@ namespace igbgui
         {
             if (resolution < 0)
                 throw new ArgumentOutOfRangeException(nameof(resolution), "Sphere resolution cannot be less than 0.");
-            int long_amt = resolution * 4;
-            int lat_amt = resolution;
-            int pt_nb = 1 + long_amt * (2 + 2 * lat_amt) + (1+long_amt) * (1 + 2 * lat_amt);
-            SpherePos = new Vector4[pt_nb];
-            int i = 1;
-            SpherePos[0] = new Vector4(0, 0, 1, 1);
-            bool even = true;
-            for (int ii = 0; ii < long_amt; ++ii)
+            if (SpherePosLastUploaded == resolution) return;
+            if (!SpherePosCache.ContainsKey(resolution))
             {
-                var rotmat = Matrix4.CreateRotationZ((float)ii / long_amt * MathHelper.TwoPi);
-                if (ii % 2 == 0)
+                int long_amt = resolution * 4;
+                int lat_amt = resolution;
+                int pt_nb = 1 + long_amt * (2 + 2 * lat_amt) + (1 + long_amt) * (1 + 2 * lat_amt);
+                var pos = new Vector4[pt_nb];
+                int i = 1;
+                pos[0] = new Vector4(0, 0, 1, 1);
+                bool even = true;
+                for (int ii = 0; ii < long_amt; ++ii)
                 {
-                    for (int iii = 0, l_m = 2 + lat_amt * 2; iii < l_m; ++iii)
+                    var rotmat = Matrix4.CreateRotationZ((float)ii / long_amt * MathHelper.TwoPi);
+                    if (ii % 2 == 0)
                     {
-                        SpherePos[i++] = SpherePos[0] * Matrix4.CreateRotationX((float)(iii + 1) / l_m * MathHelper.Pi) * rotmat;
+                        for (int iii = 0, l_m = 2 + lat_amt * 2; iii < l_m; ++iii)
+                        {
+                            pos[i++] = pos[0] * Matrix4.CreateRotationX((float)(iii + 1) / l_m * MathHelper.Pi) * rotmat;
+                        }
+                        even = true;
                     }
-                    even = true;
-                }
-                else
-                {
-                    for (int iii = 0, l_m = 2 + lat_amt * 2; iii < l_m; ++iii)
+                    else
                     {
-                        SpherePos[i++] = SpherePos[0] * Matrix4.CreateRotationX((float)(l_m-iii-1) / l_m * MathHelper.Pi) * rotmat;
+                        for (int iii = 0, l_m = 2 + lat_amt * 2; iii < l_m; ++iii)
+                        {
+                            pos[i++] = pos[0] * Matrix4.CreateRotationX((float)(l_m - iii - 1) / l_m * MathHelper.Pi) * rotmat;
+                        }
+                        even = false;
                     }
-                    even = false;
                 }
+                for (int ii = 1, l_m = lat_amt * 2 + 2; ii < l_m; ++ii)
+                {
+                    Matrix4 rotmat;
+                    if (!even)
+                    {
+                        rotmat = Matrix4.CreateRotationX((float)ii / l_m * MathHelper.Pi);
+                    }
+                    else
+                    {
+                        rotmat = Matrix4.CreateRotationX((float)(l_m - ii) / l_m * MathHelper.Pi);
+                    }
+                    for (int iii = 0; iii <= long_amt; ++iii)
+                    {
+                        pos[i++] = pos[0] * rotmat * Matrix4.CreateRotationZ((float)iii / long_amt * MathHelper.TwoPi);
+                    }
+                }
+                SpherePosCache.Add(resolution, pos);
             }
-            for (int ii = 1, l_m = lat_amt * 2 + 2; ii < l_m; ++ii)
-            {
-                Matrix4 rotmat;
-                if (!even)
-                {
-                    rotmat = Matrix4.CreateRotationX((float)ii / l_m * MathHelper.Pi);
-                }
-                else
-                {
-                    rotmat = Matrix4.CreateRotationX((float)(l_m - ii) / l_m * MathHelper.Pi);
-                }
-                for (int iii = 0; iii <= long_amt; ++iii)
-                {
-                    SpherePos[i++] = SpherePos[0] * rotmat * Matrix4.CreateRotationZ((float)iii / long_amt * MathHelper.TwoPi);
-                }
-            }
-            vaoSphereLine.UpdatePositions(SpherePos);
+            vaoSphereLine.UpdatePositions(SpherePosCache[resolution]);
+            SpherePosLastUploaded = resolution;
         }
 
         public GLViewer(GLControlSettings settings) : base(settings)
@@ -145,7 +152,6 @@ namespace igbgui
             vaoAxes.UpdateColors(AxesCol);
 
             vaoSphereLine = new VAO("line-model", PrimitiveType.LineStrip);
-            MakeLineSphere(4);
 
             // set the clear color to black
             GL.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);

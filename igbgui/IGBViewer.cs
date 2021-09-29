@@ -121,7 +121,7 @@ namespace igbgui
                     }
                     else if (obj is LevelInfoKartStart info_kart)
                     {
-                        MakeLineSphere(4);
+                        MakeLineSphere(3);
                         render.Projection.UserColor1 = Color4.Yellow;
                         render.Projection.UserColor2 = Color4.Red;
                         var pos_list = info_kart.PosList.Value.GetList();
@@ -137,7 +137,7 @@ namespace igbgui
                     }
                     else if (obj is LevelInfoTrackPortal info_portal)
                     {
-                        MakeLineSphere(3);
+                        MakeLineSphere(4);
                         render.Projection.UserColor1 = Color4.Cyan;
                         render.Projection.UserColor2 = Color4.White;
                         foreach (var portal in info_portal.PortalList.Value.GetList())
