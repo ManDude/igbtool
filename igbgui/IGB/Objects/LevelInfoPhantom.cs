@@ -4,9 +4,9 @@ namespace igbgui.Structs
 {
     public class LevelInfoPhantom : igObject
     {
-        public igObjectRefMetaField<igObjectList<PhantomOBB>> OBBList1;
-        public igObjectRefMetaField<igObjectList<PhantomOBB>> OBBList2;
-        public igObjectRefMetaField<igObjectList<PhantomAABB>> AABBList;
+        public igObjectRefMetaField<PhantomOBBList> OBBList1;
+        public igObjectRefMetaField<PhantomOBBList> OBBList2;
+        public igObjectRefMetaField<PhantomAABBList> AABBList;
         public igObjectRefMetaField<igObjectList<igObject>> SphereList;
         public igObjectRefMetaField<igObjectList<igObject>> QHullList;
 

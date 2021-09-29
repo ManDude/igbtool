@@ -35,6 +35,7 @@ namespace igbgui
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewerSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.panel1 = new System.Windows.Forms.Panel();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -85,11 +86,20 @@ namespace igbgui
             this.viewerSettingsToolStripMenuItem.Text = "Viewer Settings";
             this.viewerSettingsToolStripMenuItem.Click += new System.EventHandler(this.viewerSettingsToolStripMenuItem_Click);
             // 
+            // panel1
+            // 
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel1.Location = new System.Drawing.Point(0, 25);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(800, 425);
+            this.panel1.TabIndex = 1;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
@@ -109,6 +119,7 @@ namespace igbgui
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewerSettingsToolStripMenuItem;
+        private System.Windows.Forms.Panel panel1;
     }
 }
 

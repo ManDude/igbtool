@@ -27,7 +27,7 @@ namespace igbgui
                 Profile = ContextProfile.Core
             };
             var viewer = new IGBViewer(viewerSettings, settings, () => { return currentIGB; }) { Dock = DockStyle.Fill };
-            Controls.Add(viewer);
+            panel1.Controls.Add(viewer);
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)

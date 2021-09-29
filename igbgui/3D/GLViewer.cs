@@ -53,7 +53,7 @@ namespace igbgui
 
         private const float PerFrame = 1f / 60f;
 
-        protected void MakeLineSphere(int long_amt, int lat_amt, Color4 col)
+        protected void MakeLineSphere(int long_amt, int lat_amt, Color4 col1, Color4 col2)
         {
             if (long_amt < 3)
                 throw new ArgumentOutOfRangeException(nameof(long_amt), "Sphere longitude cannot be less than 3.");
@@ -102,14 +102,14 @@ namespace igbgui
             }
             vaoSphereLine.UpdatePositions(SpherePos);
 
-            MakeLineSphereColor(col);
+            MakeLineSphereColor(col1, col2);
         }
-        protected void MakeLineSphereColor(Color4 col)
+        protected void MakeLineSphereColor(Color4 col1, Color4 col2)
         {
             SphereCol = new Color4[SpherePos.Length];
             for (int i = 0; i < SphereCol.Length; ++i)
             {
-                SphereCol[i] = col;
+                SphereCol[i] = Color4Ext.Lerp(col1, col2, (SpherePos[i].Y+1)/2);
             }
             vaoSphereLine.UpdateColors(SphereCol);
         }
@@ -166,7 +166,7 @@ namespace igbgui
             vaoAxes.UpdateColors(AxesCol);
 
             vaoSphereLine = new VAO("line-model", PrimitiveType.LineStrip);
-            MakeLineSphere(16, 4, Color4.Yellow);
+            MakeLineSphere(16, 4, Color4.Yellow, Color4.Red);
 
             // set the clear color to black
             GL.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);

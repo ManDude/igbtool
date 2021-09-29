@@ -119,6 +119,18 @@ namespace igbgui
                             RenderSpline(spline, Color4.BlueViolet);
                         }
                     }
+                    else if (obj is LevelInfoKartStart info_kart)
+                    {
+                        var pos_list = info_kart.PosList.Value.GetList();
+                        var rot_list = info_kart.RotList.Value.GetList();
+                        render.Projection.UserScale = new(2);
+                        for (int i = 0; i < pos_list.Count; ++i)
+                        {
+                            render.Projection.UserTrans = pos_list[i];
+                            render.Projection.UserVec4 = rot_list[i];
+                            vaoSphereLine.Render(render);
+                        }
+                    }
                     /*else if (obj is vvSplineObj spline)
                     {
                         RenderSpline(spline, Color4.White);
