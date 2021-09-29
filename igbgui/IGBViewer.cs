@@ -194,7 +194,8 @@ namespace igbgui
                     {
                         foreach (var spline in info_magdisp.MagGravSplineList.Value.GetList())
                         {
-                            RenderSpline(spline, Color4.Orange);
+                            if (spline != null)
+                                RenderSpline(spline, Color4.Orange);
                         }
                     }
                     /*else if (obj is vvSplineObj spline)
