@@ -5,9 +5,9 @@ namespace igbgui.Structs
     public class vvSplineObj : igNode
     {
         public igObjectRefMetaField<igVec3fList> Spline;
-        public vvSplineObj(IgbStruct s) : base(s)
+        public vvSplineObj(IGB igb, IgbObjectRef info) : base(igb, info)
         {
-            Spline = new(this, 3);
+            Spline = new(this, info, 3);
         }
     }
 }

@@ -1,9 +1,10 @@
 ﻿namespace igbgui.Types
 {
-    public class igStringMetaField : IgbField
+    public class igStringMetaField : IgbClassField<string>
     {
-        public string Value { get => ReadString(); set => Write(value); }
-        public igStringMetaField() { }
-        public igStringMetaField(IgbObject parent, int index) : base(parent, index) { }
+        public igStringMetaField(IgbObject parent, IgbObjectRef info, int index) : base(parent, info, index, BitUtils.ReadString) { }
+        public igStringMetaField(IgbEntity parent, IgbMemoryRef info, int offset) : base(parent, info, offset, BitUtils.ReadString) { }
+
+        public new static int Size => 4;
     }
 }

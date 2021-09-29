@@ -6,10 +6,10 @@ namespace igbgui.Structs
     {
         public igVec3fMetaField Pos;
         public igVec3fMetaField Size;
-        public PhantomAABB(IgbStruct s) : base(s)
+        public PhantomAABB(IGB igb, IgbObjectRef info) : base(igb, info)
         {
-            Pos = new(this, 1);
-            Size = new(this, 2);
+            Pos = new(this, info, 1);
+            Size = new(this, info, 2);
         }
     }
 }

@@ -7,11 +7,11 @@ namespace igbgui.Structs
         public igVec4fMetaField Quat;
         public igVec3fMetaField Pos;
         public igVec3fMetaField Size;
-        public PhantomOBB(IgbStruct s) : base(s)
+        public PhantomOBB(IGB igb, IgbObjectRef info) : base(igb, info)
         {
-            Quat = new(this, 1);
-            Pos = new(this, 2);
-            Size = new(this, 3);
+            Quat = new(this, info, 1);
+            Pos = new(this, info, 2);
+            Size = new(this, info, 3);
         }
     }
 }

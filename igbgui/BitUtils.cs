@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using OpenTK.Mathematics;
 
 namespace igbgui
 {
@@ -11,17 +12,24 @@ namespace igbgui
             return res - res % n;
         }
 
-        public static void WriteBytes(byte[] data, int offset, bool val) => Array.Copy(BitConverter.GetBytes(val), 0, data, offset, 1);
-        public static void WriteBytes(byte[] data, int offset, byte val) => Array.Copy(BitConverter.GetBytes(val), 0, data, offset, 1);
-        public static void WriteBytes(byte[] data, int offset, sbyte val) => Array.Copy(BitConverter.GetBytes(val), 0, data, offset, 1);
-        public static void WriteBytes(byte[] data, int offset, short val) => Array.Copy(BitConverter.GetBytes(val), 0, data, offset, 2);
-        public static void WriteBytes(byte[] data, int offset, ushort val) => Array.Copy(BitConverter.GetBytes(val), 0, data, offset, 2);
-        public static void WriteBytes(byte[] data, int offset, int val) => Array.Copy(BitConverter.GetBytes(val), 0, data, offset, 4);
-        public static void WriteBytes(byte[] data, int offset, uint val) => Array.Copy(BitConverter.GetBytes(val), 0, data, offset, 4);
-        public static void WriteBytes(byte[] data, int offset, long val) => Array.Copy(BitConverter.GetBytes(val), 0, data, offset, 8);
-        public static void WriteBytes(byte[] data, int offset, ulong val) => Array.Copy(BitConverter.GetBytes(val), 0, data, offset, 8);
-        public static void WriteBytes(byte[] data, int offset, float val) => Array.Copy(BitConverter.GetBytes(val), 0, data, offset, 4);
-        public static void WriteBytes(byte[] data, int offset, double val) => Array.Copy(BitConverter.GetBytes(val), 0, data, offset, 8);
-        public static void WriteBytes(byte[] data, int offset, string val) => Array.Copy(Encoding.UTF8.GetBytes(val), 0, data, offset, Encoding.UTF8.GetByteCount(val));
+        public static void Write(byte[] dest, int offset, bool val) => Array.Copy(BitConverter.GetBytes(val), 0, dest, offset, 1);
+        public static void Write(byte[] dest, int offset, byte val) => Array.Copy(BitConverter.GetBytes(val), 0, dest, offset, 1);
+        public static void Write(byte[] dest, int offset, sbyte val) => Array.Copy(BitConverter.GetBytes(val), 0, dest, offset, 1);
+        public static void Write(byte[] dest, int offset, short val) => Array.Copy(BitConverter.GetBytes(val), 0, dest, offset, 2);
+        public static void Write(byte[] dest, int offset, ushort val) => Array.Copy(BitConverter.GetBytes(val), 0, dest, offset, 2);
+        public static void Write(byte[] dest, int offset, int val) => Array.Copy(BitConverter.GetBytes(val), 0, dest, offset, 4);
+        public static void Write(byte[] dest, int offset, uint val) => Array.Copy(BitConverter.GetBytes(val), 0, dest, offset, 4);
+        public static void Write(byte[] dest, int offset, long val) => Array.Copy(BitConverter.GetBytes(val), 0, dest, offset, 8);
+        public static void Write(byte[] dest, int offset, ulong val) => Array.Copy(BitConverter.GetBytes(val), 0, dest, offset, 8);
+        public static void Write(byte[] dest, int offset, float val) => Array.Copy(BitConverter.GetBytes(val), 0, dest, offset, 4);
+        public static void Write(byte[] dest, int offset, double val) => Array.Copy(BitConverter.GetBytes(val), 0, dest, offset, 8);
+        public static void Write(byte[] dest, int offset, string val) => Array.Copy(Encoding.UTF8.GetBytes(val), 0, dest, offset, Encoding.UTF8.GetByteCount(val));
+
+        public static bool ReadBool(byte[] data, int offset) => BitConverter.ToBoolean(data, offset);
+        public static int ReadInt(byte[] data, int offset) => BitConverter.ToInt32(data, offset);
+        public static float ReadFloat(byte[] data, int offset) => BitConverter.ToSingle(data, offset);
+        public static string ReadString(byte[] data, int offset) => Encoding.UTF8.GetString(data, offset+4, ReadInt(data, offset));
+        public static Vector3 ReadVec3f(byte[] data, int offset) => new Vector3(ReadFloat(data, offset + 0), ReadFloat(data, offset + 4), ReadFloat(data, offset + 8));
+        public static Vector4 ReadVec4f(byte[] data, int offset) => new Vector4(ReadFloat(data, offset + 0), ReadFloat(data, offset + 4), ReadFloat(data, offset + 8), ReadFloat(data, offset + 12));
     }
 }

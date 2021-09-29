@@ -21,7 +21,7 @@ namespace igbgui
         public void Reset()
         {
             Distance = InitialDistance;
-            Projection.Trans = new(0, 0, -Distance);
+            Projection.Trans = new(0, Distance, 0);
             Projection.Rot = new(BaseRot, 0, 0);
             Projection.Scale = new(1);
         }

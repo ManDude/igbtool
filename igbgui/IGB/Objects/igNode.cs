@@ -6,10 +6,10 @@ namespace igbgui.Structs
     {
         public igObjectRefMetaField<igObject> Obj;
         public igIntMetaField Int;
-        public igNode(IgbStruct s) : base(s)
+        public igNode(IGB igb, IgbObjectRef info) : base(igb, info)
         {
-            Obj = new(this, 1);
-            Int = new(this, 2);
+            Obj = new(this, info, 1);
+            Int = new(this, info, 2);
         }
     }
 }

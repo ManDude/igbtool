@@ -1,12 +1,16 @@
 ﻿namespace igbgui.Types
 {
-    public class igMemoryRefMetaField : IgbField
+    public class igMemoryRefMetaField<T> : IgbClassField<IgbMemory<T>> where T : IgbField
     {
-        public IgbMemory Value { get; set; }
-        public igMemoryRefMetaField() { }
-        public igMemoryRefMetaField(IgbObject parent, int index) : base(parent, index) { }
+        public igMemoryRefMetaField(IgbObject parent, IgbObjectRef info, int index) : base(parent, info, index, null)
+        {
+            Value = parent.IGB.GetRef<IgbMemory<T>>(BitUtils.ReadInt(info.Data, GetOffset(info.Data)));
+        }
+        public igMemoryRefMetaField(IgbEntity parent, IgbMemoryRef info, int offset) : base(parent, info, offset, null)
+        {
+            Value = parent.IGB.GetRef<IgbMemory<T>>(BitUtils.ReadInt(info.Data, offset));
+        }
 
-        public void GetVal() => Value = ReadMemRef();
-        public void SetVal() => Write(Value);
+        public new static int Size => 4;
     }
 }

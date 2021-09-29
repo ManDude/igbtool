@@ -4,16 +4,16 @@ using System.Collections.Generic;
 
 namespace igbgui.Structs
 {
-    public class igDataList : igObject, IigList<object>
+    public class igDataList<T> : igObject, IigList<object> where T : IgbField
     {
         public igIntMetaField Length;
         public igIntMetaField AllocatedLength;
-        public igMemoryRefMetaField DataList;
-        public igDataList(IgbStruct s) : base(s)
+        public igMemoryRefMetaField<T> DataList;
+        public igDataList(IGB igb, IgbObjectRef info) : base(igb, info)
         {
-            Length = new(this, 0);
-            AllocatedLength = new(this, 1);
-            DataList = new(this, 2);
+            Length = new(this, info, 0);
+            AllocatedLength = new(this, info, 1);
+            DataList = new(this, info, 2);
         }
 
         public List<object> GetList()

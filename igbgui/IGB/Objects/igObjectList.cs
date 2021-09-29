@@ -4,24 +4,24 @@ using System.Collections.Generic;
 
 namespace igbgui.Structs
 {
-    public class igObjectList : igDataList, IigList<igObject>
+    public class igObjectList<T> : igDataList<igObjectRefMetaField<T>>, IigList<T> where T : igObject
     {
-        public igObjectList(IgbStruct s) : base(s)
+        public igObjectList(IGB igb, IgbObjectRef info) : base(igb, info)
         {
         }
 
-        public new List<igObject> GetList()
+        public new List<T> GetList()
         {
-            var list = new List<igObject>();
-            for (int i = 0; i < DataList.Value.Data.Length / 4; ++i)
+            var list = new List<T>();
+            foreach (var v in DataList.Value.Data)
             {
-                list.Add(At(i));
+                list.Add(v.Value);
             }
             return list;
         }
-        public new igObject At(int index)
+        public new T At(int index)
         {
-            return IGB.GetRef<igObject>(BitConverter.ToInt32(DataList.Value.Data, index * 4));
+            return DataList.Value.Data[index].Value;
         }
     }
 }

@@ -10,19 +10,6 @@ namespace igbgui
 {
     public partial class GLViewer : GLControl
     {
-        // Points of a triangle in normalized device coordinates.
-        readonly Vector4[] Points = new Vector4[3] {
-            new Vector4(-0.5f, -0.5f, 0, 1),
-            new Vector4(0.5f, -0.5f, 0, 1),
-            new Vector4(0, 0.5f, 0, 1)
-        };
-        readonly Color4[] Colors = new Color4[3] {
-            new Color4(1, 0, 0, 1f),
-            new Color4(0, 1, 0, 1f),
-            new Color4(0, 0, 1, 1f)
-        };
-
-        // Points of a triangle in normalized device coordinates.
         readonly float[] AxesPos = new float[] {
             // X, Y, Z, W
             -0.5f, 0, 0, 1,
@@ -41,10 +28,12 @@ namespace igbgui
             0, 0, 1, 1,
             0, 0, 1, 1
         };
+        protected Vector4[] SpherePos;
+        protected Color4[] SphereCol;
+        protected VAO vaoSphereLine;
 
         protected readonly RenderInfo render;
 
-        // private VAO vaoTest;
         private VAO vaoAxes;
         private VAO vaoText;
 
@@ -63,6 +52,67 @@ namespace igbgui
         private float rotspeed = 0.5f;
 
         private const float PerFrame = 1f / 60f;
+
+        protected void MakeLineSphere(int long_amt, int lat_amt, Color4 col)
+        {
+            if (long_amt < 3)
+                throw new ArgumentOutOfRangeException(nameof(long_amt), "Sphere longitude cannot be less than 3.");
+            if (lat_amt < 0)
+                throw new ArgumentOutOfRangeException(nameof(long_amt), "Sphere latitude cannot be less than 0.");
+            int pt_nb = 1 + long_amt * (2 + 2 * lat_amt) + (1+long_amt) * (1 + 2 * lat_amt);
+            SpherePos = new Vector4[pt_nb];
+            int i = 1;
+            SpherePos[0] = new Vector4(0, 0, 1, 1);
+            bool even = true;
+            for (int ii = 0; ii < long_amt; ++ii)
+            {
+                var rotmat = Matrix4.CreateRotationZ((float)ii / long_amt * MathHelper.TwoPi);
+                if (ii % 2 == 0)
+                {
+                    for (int iii = 0, l_m = 2 + lat_amt * 2; iii < l_m; ++iii)
+                    {
+                        SpherePos[i++] = SpherePos[0] * Matrix4.CreateRotationX((float)(iii + 1) / l_m * MathHelper.Pi) * rotmat;
+                    }
+                    even = true;
+                }
+                else
+                {
+                    for (int iii = 0, l_m = 2 + lat_amt * 2; iii < l_m; ++iii)
+                    {
+                        SpherePos[i++] = SpherePos[0] * Matrix4.CreateRotationX((float)(l_m-iii-1) / l_m * MathHelper.Pi) * rotmat;
+                    }
+                    even = false;
+                }
+            }
+            for (int ii = 1, l_m = lat_amt * 2 + 2; ii < l_m; ++ii)
+            {
+                Matrix4 rotmat;
+                if (!even)
+                {
+                    rotmat = Matrix4.CreateRotationX((float)ii / l_m * MathHelper.Pi);
+                }
+                else
+                {
+                    rotmat = Matrix4.CreateRotationX((float)(l_m - ii) / l_m * MathHelper.Pi);
+                }
+                for (int iii = 0; iii <= long_amt; ++iii)
+                {
+                    SpherePos[i++] = SpherePos[0] * rotmat * Matrix4.CreateRotationZ((float)iii / long_amt * MathHelper.TwoPi);
+                }
+            }
+            vaoSphereLine.UpdatePositions(SpherePos);
+
+            MakeLineSphereColor(col);
+        }
+        protected void MakeLineSphereColor(Color4 col)
+        {
+            SphereCol = new Color4[SpherePos.Length];
+            for (int i = 0; i < SphereCol.Length; ++i)
+            {
+                SphereCol[i] = col;
+            }
+            vaoSphereLine.UpdateColors(SphereCol);
+        }
 
         public GLViewer(GLControlSettings settings) : base(settings)
         {
@@ -110,15 +160,13 @@ namespace igbgui
             // init all shaders
             Shader.InitShaders();
 
-            // init test vao
-            //vaoTest = new VAO("test", PrimitiveType.Triangles);
-            //vaoTest.UpdatePositions(Points);
-            //vaoTest.UpdateColors(Colors);
-
             // init axes vao
             vaoAxes = new VAO("axes", PrimitiveType.Lines);
             vaoAxes.UpdatePositions(AxesPos);
             vaoAxes.UpdateColors(AxesCol);
+
+            vaoSphereLine = new VAO("line-model", PrimitiveType.LineStrip);
+            MakeLineSphere(16, 4, Color4.Yellow);
 
             // set the clear color to black
             GL.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -173,12 +221,12 @@ namespace igbgui
             var d = movespeed * PerFrame * (render.Distance/RenderInfo.InitialDistance);
             if (KDown(Keys.ControlKey))
             {
-                if (KDown(Keys.W)) render.Projection.Trans.Z += d;
-                if (KDown(Keys.S)) render.Projection.Trans.Z -= d;
+                if (KDown(Keys.W)) render.Projection.Trans.Y += d;
+                if (KDown(Keys.S)) render.Projection.Trans.Y -= d;
                 if (KDown(Keys.A)) render.Projection.Trans.X += d;
                 if (KDown(Keys.D)) render.Projection.Trans.X -= d;
-                if (KDown(Keys.E)) render.Projection.Trans.Y += d;
-                if (KDown(Keys.Q)) render.Projection.Trans.Y -= d;
+                if (KDown(Keys.E)) render.Projection.Trans.Z += d;
+                if (KDown(Keys.Q)) render.Projection.Trans.Z -= d;
             }
             else
             {
@@ -261,7 +309,6 @@ namespace igbgui
                     float rotz = render.Projection.Rot.Z;
                     rotz += MathHelper.DegreesToRadians(e.X - mousex) * rotspeed;
                     rotx += MathHelper.DegreesToRadians(e.Y - mousey) * rotspeed;
-                    // roty %= 360;
                     if (rotx > RenderInfo.MaxRot)
                         rotx = RenderInfo.MaxRot;
                     if (rotx < RenderInfo.MinRot)
@@ -292,7 +339,6 @@ namespace igbgui
             GL.UseProgram(0);
 
             // Delete all the resources.
-            // vaoTest = null;
             vaoAxes = null;
             vaoText = null;
             Shader.KillShaders();

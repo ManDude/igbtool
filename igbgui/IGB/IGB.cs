@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
 using System.Linq;
+using igbgui.Structs;
 
 namespace igbgui
 {
@@ -15,11 +16,11 @@ namespace igbgui
             var q = from t in Assembly.GetExecutingAssembly().GetTypes()
                     where t.IsClass && t.Namespace == "igbgui.Types"
                     select t;
-            q.ToList().ForEach(t => igbFieldTypes.Add(t.Name, t));
+            q.ToList().ForEach(t => igbFieldTypes.Add(t.IsGenericType ? t.Name.Remove(t.Name.IndexOf('`')) : t.Name, t));
             q = from t in Assembly.GetExecutingAssembly().GetTypes()
                     where t.IsClass && t.Namespace == "igbgui.Structs"
                     select t;
-            q.ToList().ForEach(t => igbStructTypes.Add(t.Name, t));
+            q.ToList().ForEach(t => igbStructTypes.Add(t.IsGenericType ? t.Name.Remove(t.Name.IndexOf('`')) : t.Name, t));
         }
 
         public static IGB Load(byte[] data)
@@ -124,8 +125,8 @@ namespace igbgui
 
             // REFS
             var refs = new IgbRefType[counts[0]];
-            var objs = new List<IgbObject>();
-            var mems = new List<IgbMemory>();
+            var objs = new List<IgbObjectRef>();
+            var mems = new List<IgbMemoryRef>();
             for (int i = 0; i < refs.Length; ++i)
             {
                 var type = BitConverter.ToInt32(data, seek+0);
@@ -137,21 +138,16 @@ namespace igbgui
                 }
                 if (type == 3)
                 {
-                    var s = structs[BitConverter.ToInt32(data, seek + 12)];
-                    dynamic obj;
-                    if (igbStructTypes.ContainsKey(s.Name))
+                    var obj = new IgbObjectRef(i)
                     {
-                        obj = Activator.CreateInstance(igbStructTypes[s.Name], s);
-                    } else
-                    {
-                        obj = new IgbObject(s);
-                    }
+                        Struct = structs[BitConverter.ToInt32(data, seek + 12)]
+                    };
                     refs[i] = obj;
                     objs.Add(obj);
                 }
                 else if (type == 4)
                 {
-                    var mem = new IgbMemory
+                    var mem = new IgbMemoryRef(i)
                     {
                         Type = types[BitConverter.ToInt32(data, seek + 16)],
                         Data = new byte[BitConverter.ToInt32(data, seek + 12)],
@@ -210,58 +206,78 @@ namespace igbgui
 
         public IGB(uint version, IEnumerable<IgbType> types, IEnumerable<IgbShaderType> shadertypes, int shaderval, IEnumerable<IgbStruct> structs, IEnumerable<IgbRefType> refs, int top)
         {
+            ShaderVal = shaderval;
             Version = version;
             Types = new(types);
             ShaderTypes = new(shadertypes);
             Structs = new(structs);
             Refs = new(refs);
+            CurID = Refs.Count;
 
-            ShaderVal = shaderval;
-            Top = GetRef<IgbObject>(top);
-
-            foreach (var r in Refs)
-            {
-                if (r is IgbObject obj)
-                {
-                    obj.IGB = this;
-                }
-            }
-            foreach (var r in Refs)
-            {
-                if (r is IgbObject obj)
-                {
-                    if (obj.GetType() != typeof(IgbObject))
-                    {
-                        var allfields = obj.GetType().GetFields();
-                        foreach (var f in allfields.Where(f => f.FieldType == typeof(Types.igMemoryRefMetaField)))
-                        {
-                            var fieldref = (Types.igMemoryRefMetaField)f.GetValue(obj);
-                            fieldref.GetVal();
-                        }
-                        foreach (var f in allfields.Where(f => f.FieldType.IsGenericType && f.FieldType.GetGenericTypeDefinition() == typeof(Types.igObjectRefMetaField<>)))
-                        {
-                            dynamic fieldref = f.GetValue(obj);
-                            fieldref.GetVal();
-                        }
-                    }
-                }
-            }
+            Top = GetRef<igInfoList>(top);
         }
 
+        private int CurID { get; set; }
         public uint Version { get; set; }
         public List<IgbType> Types { get; set; }
         public List<IgbShaderType> ShaderTypes { get; set; }
         public int ShaderVal { get; set; }
         public List<IgbStruct> Structs { get; set; }
-        public List<IgbRefType> Refs { get; set; }
-        public IEnumerable<IgbObject> Objects => Refs.Where(t => t is IgbObject).Cast<IgbObject>();
-        public IEnumerable<IgbMemory> Memorys => Refs.Where(t => t is IgbMemory).Cast<IgbMemory>();
+        public HashSet<IgbRefType> Refs { get; set; }
+        public List<IgbObject> Objects { get; } = new();
+        public List<IgbMemory<IgbField>> Memorys { get; } = new();
         public IgbObject Top { get; set; }
 
-        public T GetRef<T>(int idx) where T : IgbRefType
+        public T GetRef<T>(int idx) where T : IgbEntity
         {
             if (idx == -1) return null;
-            return Refs[idx] as T;
+            IgbRefType res = null;
+            foreach (var r in Refs)
+            {
+                if (r.ID == idx)
+                {
+                    res = r;
+                    break;
+                }
+            }
+            if (res is IgbObjectRef objref && igbStructTypes.ContainsKey(objref.Struct.Name) && typeof(T).IsSubclassOf(typeof(IgbObject)))
+            {
+                var type = igbStructTypes[objref.Struct.Name];
+                if (type.Name == typeof(T).Name || type.IsSubclassOf(typeof(T)))
+                {
+                    Refs.Remove(res);
+                    T obj;
+                    if (type.IsGenericType)
+                    {
+                        obj = Activator.CreateInstance(type.MakeGenericType(typeof(T).GetGenericArguments()), this, objref) as T;
+                    }
+                    else
+                    {
+                        obj = Activator.CreateInstance(type, this, objref) as T;
+                    }
+                    Objects.Add(obj as IgbObject);
+                    return obj;
+                }
+                else
+                {
+                    throw new Exception();
+                }
+            }
+            else if (res is IgbMemoryRef memref && igbFieldTypes.ContainsKey(memref.Type.Name))
+            {
+                var type = igbFieldTypes[memref.Type.Name];
+                var memtype = typeof(T).GetGenericArguments()[0];
+                if (type.Name == memtype.Name)
+                {
+                    return Activator.CreateInstance(typeof(T), this, memref) as T;
+                }
+                else
+                {
+                    throw new Exception();
+                }
+            }
+            return null;
+            throw new Exception();
         }
     }
 }

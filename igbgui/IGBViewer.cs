@@ -77,7 +77,7 @@ namespace igbgui
             base.Render();
             if (igb() != null)
             {
-                foreach (var obj in igb().Refs.Where(r => r is IgbObject))
+                foreach (var obj in igb().Objects)
                 {
                     if (viewerSettings.DisplayAABBs && obj is PhantomAABB aabb)
                     {
@@ -112,15 +112,22 @@ namespace igbgui
                         vaoLineModel.UpdateColors(cols);
                         vaoLineModel.Render(render);
                     }
-                    else if (obj is vvSplineObj spline)
+                    else if (obj is LevelInfoAi info_ai)
                     {
-                        RenderSpline(spline, 1, 1, 1, 1);
+                        foreach (var spline in info_ai.SplineList.Value.GetList())
+                        {
+                            RenderSpline(spline, Color4.BlueViolet);
+                        }
                     }
+                    /*else if (obj is vvSplineObj spline)
+                    {
+                        RenderSpline(spline, Color4.White);
+                    }*/
                 }
             }
         }
 
-        private void RenderSpline(vvSplineObj spline, float r, float g, float b, float a)
+        private void RenderSpline(vvSplineObj spline, Color4 col)
         {
             var points = spline.Spline.Value.GetList();
             var verts = new Vector4[points.Count];
@@ -131,10 +138,7 @@ namespace igbgui
                 verts[i].Y = points[i].Y;
                 verts[i].Z = points[i].Z;
                 verts[i].W = 1;
-                cols[i].R = r;
-                cols[i].G = g;
-                cols[i].B = b;
-                cols[i].A = a;
+                cols[i] = col;
             }
             vaoLineLoop.UpdatePositions(verts);
             vaoLineLoop.UpdateColors(cols);

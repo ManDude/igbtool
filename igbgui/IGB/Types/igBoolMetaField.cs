@@ -1,9 +1,10 @@
 ﻿namespace igbgui.Types
 {
-    public class igBoolMetaField : IgbField
+    public class igBoolMetaField : IgbStructField<bool>
     {
-        public bool Value { get => ReadBool(); set => Write(value); }
-        public igBoolMetaField() { }
-        public igBoolMetaField(IgbObject parent, int index) : base(parent, index) { }
+        public igBoolMetaField(IgbObject parent, IgbObjectRef info, int index) : base(parent, info, index, BitUtils.ReadBool) { }
+        public igBoolMetaField(IgbEntity parent, IgbMemoryRef info, int offset) : base(parent, info, offset, BitUtils.ReadBool) { }
+
+        public new static int Size => 1;
     }
 }

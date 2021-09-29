@@ -5,9 +5,9 @@ namespace igbgui.Structs
     public class igInfo : igNamedObject
     {
         public igBoolMetaField Bool;
-        public igInfo(IgbStruct s) : base(s)
+        public igInfo(IGB igb, IgbObjectRef info) : base(igb, info)
         {
-            Bool = new(this, 1);
+            Bool = new(this, info, 1);
         }
     }
 }

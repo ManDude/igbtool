@@ -2,10 +2,11 @@
 
 namespace igbgui.Types
 {
-    public class igVec3fMetaField : IgbField
+    public class igVec3fMetaField : IgbStructField<Vector3>
     {
-        public Vector3 Value { get => ReadVec3f(); set => Write(value); }
-        public igVec3fMetaField() { }
-        public igVec3fMetaField(IgbObject parent, int index) : base(parent, index) { }
+        public igVec3fMetaField(IgbObject parent, IgbObjectRef info, int index) : base(parent, info, index, BitUtils.ReadVec3f) { }
+        public igVec3fMetaField(IgbEntity parent, IgbMemoryRef info, int offset) : base(parent, info, offset, BitUtils.ReadVec3f) { }
+
+        public new static int Size => 12;
     }
 }
