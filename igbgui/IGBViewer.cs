@@ -119,6 +119,10 @@ namespace igbgui
                             RenderSpline(spline, Color4.BlueViolet);
                         }
                     }
+                    else if (obj is LevelInfoCamera info_cam)
+                    {
+                        RenderSpline(info_cam.Spline.Value, Color4.Lime);
+                    }
                     else if (obj is LevelInfoKartStart info_kart)
                     {
                         MakeLineSphere(3);
