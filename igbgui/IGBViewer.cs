@@ -15,6 +15,7 @@ namespace igbgui
         private VAO vaoLines;
         private VAO vaoLineModel;
         private VAO vaoLineLoop;
+        private VAO vaoLineStrip;
 
         private Vector4[] boxVerts = new Vector4[24] {
             // sides
@@ -70,6 +71,7 @@ namespace igbgui
             vaoLines = new("line", PrimitiveType.Lines);
             vaoLineModel = new("line-model", PrimitiveType.Lines);
             vaoLineLoop = new("line", PrimitiveType.LineLoop);
+            vaoLineStrip = new("line", PrimitiveType.LineStrip);
         }
 
         protected override void Render()
@@ -181,6 +183,20 @@ namespace igbgui
                             vaoSphereLine.Render(render);
                         }
                     }
+                    else if (obj is LevelInfoMagGrav info_maggrav)
+                    {
+                        foreach (var spline in info_maggrav.MagGravSplineList.Value.GetList())
+                        {
+                            RenderSpline(spline, Color4.Cyan);
+                        }
+                    }
+                    else if (obj is LevelInfoMagDisp info_magdisp)
+                    {
+                        foreach (var spline in info_magdisp.MagGravSplineList.Value.GetList())
+                        {
+                            RenderSpline(spline, Color4.Orange);
+                        }
+                    }
                     /*else if (obj is vvSplineObj spline)
                     {
                         RenderSpline(spline, Color4.White);
@@ -193,18 +209,34 @@ namespace igbgui
         {
             var points = spline.Spline.Value.GetList();
             var verts = new Vector4[points.Count];
-            var cols = new Color4[points.Count];
             for (int i = 0; i < points.Count; ++i)
             {
                 verts[i].X = points[i].X;
                 verts[i].Y = points[i].Y;
                 verts[i].Z = points[i].Z;
                 verts[i].W = 1;
-                cols[i] = col;
             }
+            render.Projection.PushColorMode(ProjectionInfo.ColorModeEnum.Plain);
+            render.Projection.UserColor1 = col;
             vaoLineLoop.UpdatePositions(verts);
-            vaoLineLoop.UpdateColors(cols);
             vaoLineLoop.Render(render);
+        }
+
+        private void RenderSpline(MagGravSpline spline, Color4 col)
+        {
+            var nodes = spline.NodeList.Value.GetList();
+            var verts = new Vector4[nodes.Count];
+            for (int i = 0; i < nodes.Count; ++i)
+            {
+                verts[i].X = nodes[i].Pos.X;
+                verts[i].Y = nodes[i].Pos.Y;
+                verts[i].Z = nodes[i].Pos.Z;
+                verts[i].W = 1;
+            }
+            render.Projection.PushColorMode(ProjectionInfo.ColorModeEnum.Plain);
+            render.Projection.UserColor1 = col;
+            vaoLineStrip.UpdatePositions(verts);
+            vaoLineStrip.Render(render);
         }
     }
 }
