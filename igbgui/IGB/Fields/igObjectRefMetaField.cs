@@ -1,6 +1,6 @@
-﻿using igbgui.Structs;
+﻿using igbgui.Objects;
 
-namespace igbgui.Types
+namespace igbgui.Fields
 {
     public class igObjectRefMetaField<T> : IgbClassField<T> where T : igObject
     {

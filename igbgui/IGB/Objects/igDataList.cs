@@ -1,8 +1,8 @@
-﻿using igbgui.Types;
+﻿using igbgui.Fields;
 using System;
 using System.Collections.Generic;
 
-namespace igbgui.Structs
+namespace igbgui.Objects
 {
     public class igDataList<T> : igObject, IigList<object> where T : IgbField
     {

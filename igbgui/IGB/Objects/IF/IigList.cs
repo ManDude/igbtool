@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace igbgui.Structs
+namespace igbgui.Objects
 {
     public interface IigList<T>
     {

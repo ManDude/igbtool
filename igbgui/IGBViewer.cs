@@ -1,5 +1,5 @@
 ﻿using OpenTK.WinForms;
-using igbgui.Structs;
+using igbgui.Objects;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using System;

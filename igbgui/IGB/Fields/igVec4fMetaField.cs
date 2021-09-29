@@ -1,6 +1,6 @@
 ﻿using OpenTK.Mathematics;
 
-namespace igbgui.Types
+namespace igbgui.Fields
 {
     public class igVec4fMetaField : IgbStructField<Vector4>
     {

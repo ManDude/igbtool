@@ -1,6 +1,6 @@
-﻿using igbgui.Types;
+﻿using igbgui.Fields;
 
-namespace igbgui.Structs
+namespace igbgui.Objects
 {
     public class igInfoList : igObjectList<LevelInfo>
     {

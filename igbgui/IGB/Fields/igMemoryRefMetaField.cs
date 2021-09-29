@@ -1,4 +1,4 @@
-﻿namespace igbgui.Types
+﻿namespace igbgui.Fields
 {
     public class igMemoryRefMetaField<T> : IgbClassField<IgbMemory<T>> where T : IgbField
     {

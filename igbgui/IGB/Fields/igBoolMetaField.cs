@@ -1,4 +1,4 @@
-﻿namespace igbgui.Types
+﻿namespace igbgui.Fields
 {
     public class igBoolMetaField : IgbStructField<bool>
     {

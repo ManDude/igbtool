@@ -1,7 +1,7 @@
-﻿using igbgui.Types;
+﻿using igbgui.Fields;
 using System.Collections.Generic;
 
-namespace igbgui.Structs
+namespace igbgui.Objects
 {
     public class igIntList : igDataList<igIntMetaField>, IigList<int>
     {
