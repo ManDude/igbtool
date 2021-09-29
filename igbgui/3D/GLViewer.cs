@@ -53,12 +53,12 @@ namespace igbgui
 
         private const float PerFrame = 1f / 60f;
 
-        protected void MakeLineSphere(int long_amt, int lat_amt, Color4 col1, Color4 col2)
+        protected void MakeLineSphere(int resolution, Color4 col1, Color4 col2)
         {
-            if (long_amt < 3)
-                throw new ArgumentOutOfRangeException(nameof(long_amt), "Sphere longitude cannot be less than 3.");
-            if (lat_amt < 0)
-                throw new ArgumentOutOfRangeException(nameof(long_amt), "Sphere latitude cannot be less than 0.");
+            if (resolution < 0)
+                throw new ArgumentOutOfRangeException(nameof(resolution), "Sphere resolution cannot be less than 0.");
+            int long_amt = resolution * 4;
+            int lat_amt = resolution;
             int pt_nb = 1 + long_amt * (2 + 2 * lat_amt) + (1+long_amt) * (1 + 2 * lat_amt);
             SpherePos = new Vector4[pt_nb];
             int i = 1;
@@ -166,7 +166,7 @@ namespace igbgui
             vaoAxes.UpdateColors(AxesCol);
 
             vaoSphereLine = new VAO("line-model", PrimitiveType.LineStrip);
-            MakeLineSphere(16, 4, Color4.Yellow, Color4.Red);
+            MakeLineSphere(4, Color4.Yellow, Color4.Red);
 
             // set the clear color to black
             GL.ClearColor(0.0f, 0.0f, 0.0f, 0.0f);

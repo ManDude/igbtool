@@ -121,6 +121,7 @@ namespace igbgui
                     }
                     else if (obj is LevelInfoKartStart info_kart)
                     {
+                        MakeLineSphere(4, Color4.Yellow, Color4.Red);
                         var pos_list = info_kart.PosList.Value.GetList();
                         var rot_list = info_kart.RotList.Value.GetList();
                         render.Projection.UserScale = new(2);
@@ -128,6 +129,17 @@ namespace igbgui
                         {
                             render.Projection.UserTrans = pos_list[i];
                             render.Projection.UserVec4 = rot_list[i];
+                            vaoSphereLine.Render(render);
+                        }
+                    }
+                    else if (obj is LevelInfoTrackPortal info_portal)
+                    {
+                        MakeLineSphere(3, Color4.Cyan, Color4.White);
+                        foreach (var portal in info_portal.PortalList.Value.GetList())
+                        {
+                            render.Projection.UserTrans = portal.Pos.Value;
+                            render.Projection.UserScale = portal.Size.Value;
+                            render.Projection.UserVec4 = portal.Rot.Value;
                             vaoSphereLine.Render(render);
                         }
                     }
