@@ -11,6 +11,12 @@ namespace igbgui
         private IGB currentIGB;
         private IGBViewerSettings viewerSettings;
 
+        private const string windowTitle = "igbgui";
+        private void SetTitle(string t = "")
+        {
+            Text = string.IsNullOrWhiteSpace(t) ? windowTitle : string.Format("{0} - {1}", windowTitle, t);
+        }
+
         public MainForm()
         {
             InitializeComponent();
@@ -28,6 +34,7 @@ namespace igbgui
             };
             var viewer = new IGBViewer(viewerSettings, settings, () => { return currentIGB; }) { Dock = DockStyle.Fill };
             panel1.Controls.Add(viewer);
+            SetTitle();
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -45,6 +52,7 @@ namespace igbgui
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
                     currentIGB = IGB.Load(File.ReadAllBytes(dialog.FileName));
+                    SetTitle(Path.GetFileName(dialog.FileName));
                 }
             }
         }

@@ -13,9 +13,12 @@ namespace igbgui.Objects
         public new List<CNKLetterData> GetList()
         {
             var list = new List<CNKLetterData>();
-            foreach (var v in DataList.Value.Data)
+            if (DataList.Value != null)
             {
-                list.Add(v.Value);
+                foreach (var v in DataList.Value.Data)
+                {
+                    list.Add(v.Value);
+                }
             }
             return list;
         }

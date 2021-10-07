@@ -64,6 +64,7 @@ namespace igbgui
                 {
                     throw new Exception(string.Format("field type mismatch on {2}: {0} vs. {1}", src_type, new_type, obj.GetType().Name));
                 }
+                obj.SetField(this, index);
             }
         }
     }
@@ -155,10 +156,21 @@ namespace igbgui
     public class IgbObject : IgbEntity
     {
         public IgbStruct Struct { get; }
+        public List<IgbField> Fields { get; }
 
         public IgbObject(IGB igb, IgbObjectRef info) : base(igb, info.ID)
         {
             Struct = info.Struct;
+            Fields = new();
+        }
+
+        public void SetField(IgbField field, int index)
+        {
+            while (index >= Fields.Count)
+            {
+                Fields.Add(null);
+            }
+            Fields[index] = field;
         }
     }
 
@@ -175,7 +187,6 @@ namespace igbgui
             Unk2 = info.Unk2;
             Data = new();
 
-            var test = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
             int elt_sz = (int)typeof(T).GetProperty("Size", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy).GetValue(null);
 
             int ofs = 0;
