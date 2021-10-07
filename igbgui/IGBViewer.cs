@@ -190,6 +190,32 @@ namespace igbgui
                                 RenderSpline(spline, Color4.Orange);
                         }
                     }
+                    else if (obj is LevelInfoCrates info_crates)
+                    {
+                        vaoLineModel.UpdatePositions(boxVerts);
+                        render.Projection.UserScale = new(2);
+                        render.Projection.UserColor1 = new(0x96, 0x4b, 0, 0xff);
+                        foreach (var crate in info_crates.CrateList.Value.GetList())
+                        {
+                            render.Projection.PushColorMode(ProjectionInfo.ColorModeEnum.Solid);
+                            render.Projection.UserTrans = crate.Pos;
+                            render.Projection.UserAxis = crate.Rot;
+                            vaoLineModel.Render(render);
+                        }
+                    }
+                    else if (obj is LevelInfoTriggerCrates info_trigger_crates)
+                    {
+                        vaoLineModel.UpdatePositions(boxVerts);
+                        render.Projection.UserScale = new(2);
+                        render.Projection.UserColor1 = Color4.Orange;
+                        foreach (var crate in info_trigger_crates.CrateList.Value.GetList())
+                        {
+                            render.Projection.PushColorMode(ProjectionInfo.ColorModeEnum.Solid);
+                            render.Projection.UserTrans = crate.Pos.Value;
+                            render.Projection.UserAxis = crate.Rot.Value;
+                            vaoLineModel.Render(render);
+                        }
+                    }
                     /*else if (obj is vvSplineObj spline)
                     {
                         RenderSpline(spline, Color4.White);
