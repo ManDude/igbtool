@@ -36,5 +36,6 @@ namespace igbgui
         public static CrateData ReadCrateData(byte[] data, int offset) => new(data, offset);
         public static CNKLetterData ReadCNKLetterData(byte[] data, int offset) => new(data, offset);
         public static MagGravNode ReadMagGravNode(byte[] data, int offset) => new(data, offset);
+        public static RestartPointData ReadRestartPointData(byte[] data, int offset) => new(data, offset);
     }
 }
