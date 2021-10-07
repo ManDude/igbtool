@@ -76,7 +76,7 @@ std::string type_info_default_func(const IgbTypeInfo& obj, const u8* data) {
       off += sizeof(u32);
     } else if (arg == "float") {
       off = align(off, 4);
-      out += fmt::format("{:13}", float_to_string(*(float*)(data + off)));
+      out += fmt::format("{:14}", float_to_string(*(float*)(data + off)));
       off += sizeof(float);
     } else if (arg == "double") {
       out += fmt::format("{}", *(double*)(data + off));
