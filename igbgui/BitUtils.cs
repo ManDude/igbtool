@@ -37,5 +37,6 @@ namespace igbgui
         public static CNKLetterData ReadCNKLetterData(byte[] data, int offset) => new(data, offset);
         public static MagGravNode ReadMagGravNode(byte[] data, int offset) => new(data, offset);
         public static RestartPointData ReadRestartPointData(byte[] data, int offset) => new(data, offset);
+        public static RankingNode ReadRankingNode(byte[] data, int offset) => new(data, offset);
     }
 }
