@@ -1,9 +1,9 @@
-﻿using System;
+﻿using igbgui.Objects;
+using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Reflection;
 using System.Linq;
-using igbgui.Objects;
+using System.Reflection;
+using System.Text;
 
 namespace igbgui
 {
@@ -18,8 +18,8 @@ namespace igbgui
                     select t;
             q.ToList().ForEach(t => igbFieldTypes.Add(t.IsGenericType ? t.Name.Remove(t.Name.IndexOf('`')) : t.Name, t));
             q = from t in Assembly.GetExecutingAssembly().GetTypes()
-                    where t.IsClass && t.Namespace == "igbgui.Objects"
-                    select t;
+                where t.IsClass && t.Namespace == "igbgui.Objects"
+                select t;
             q.ToList().ForEach(t => igbObjectTypes.Add(t.IsGenericType ? t.Name.Remove(t.Name.IndexOf('`')) : t.Name, t));
         }
 
@@ -32,14 +32,14 @@ namespace igbgui
             var counts = new int[5];
             for (int i = 0; i < 5; ++i)
             {
-                sizes[i] = BitConverter.ToInt32(data, seek+0);
-                counts[i] = BitConverter.ToInt32(data, seek+4);
+                sizes[i] = BitConverter.ToInt32(data, seek + 0);
+                counts[i] = BitConverter.ToInt32(data, seek + 4);
                 seek += 8;
             }
             uint magic = BitConverter.ToUInt32(data, seek);
             if (magic != 0xFADA)
                 throw new Exception("invalid magic number");
-            uint version = BitConverter.ToUInt32(data, seek+4);
+            uint version = BitConverter.ToUInt32(data, seek + 4);
             seek += 8;
 
             // TYPES
@@ -129,9 +129,9 @@ namespace igbgui
             var mems = new List<IgbMemoryRef>();
             for (int i = 0; i < refs.Length; ++i)
             {
-                var type = BitConverter.ToInt32(data, seek+0);
-                var size = BitConverter.ToInt32(data, seek+4);
-                var unk = BitConverter.ToInt32(data, seek+8);
+                var type = BitConverter.ToInt32(data, seek + 0);
+                var size = BitConverter.ToInt32(data, seek + 4);
+                var unk = BitConverter.ToInt32(data, seek + 8);
                 if (unk != 0)
                 {
                     throw new Exception(string.Format("ref unknown value is invalid value {0}", unk));
@@ -192,7 +192,7 @@ namespace igbgui
             {
                 var mem = mems[i];
                 Array.Copy(data, seek, mem.Data, 0, mem.Data.Length);
-                seek = memsk + BitUtils.Align((seek-memsk) + mem.Data.Length, 4);
+                seek = memsk + BitUtils.Align((seek - memsk) + mem.Data.Length, 4);
             }
 
             if (version == 0x80000004)

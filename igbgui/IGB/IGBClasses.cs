@@ -1,7 +1,5 @@
-﻿using OpenTK.Mathematics;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Reflection;
 
 namespace igbgui
@@ -96,7 +94,7 @@ namespace igbgui
             if (read != null)
                 Value = read(info.Data, GetOffset(info.Data));
         }
-        
+
         public IgbStructField(IgbEntity parent, IgbMemoryRef info, int offset, Func<byte[], int, T> read) : base(parent, -1)
         {
             if (read != null)

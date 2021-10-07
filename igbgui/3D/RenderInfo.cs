@@ -1,7 +1,7 @@
-﻿using System.Diagnostics;
+﻿using OpenTK.Mathematics;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using OpenTK.Mathematics;
 
 namespace igbgui
 {

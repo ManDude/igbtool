@@ -1,15 +1,14 @@
-﻿using OpenTK.WinForms;
-using igbgui.Objects;
+﻿using igbgui.Objects;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
+using OpenTK.WinForms;
 using System;
-using System.Linq;
 
 namespace igbgui
 {
     public class IGBViewer : GLViewer
     {
-        private IGBRetFuncDelegate igb;
+        private readonly IGBRetFuncDelegate getigb;
         private IGBViewerSettings viewerSettings;
 
         private VAO vaoLines;
@@ -17,7 +16,7 @@ namespace igbgui
         private VAO vaoLineLoop;
         private VAO vaoLineStrip;
 
-        private Vector4[] boxVerts = new Vector4[24] {
+        private readonly Vector4[] boxVerts = new Vector4[24] {
             // sides
             new Vector4(-1, -1, -1, 1),
             new Vector4(-1, +1, -1, 1),
@@ -60,7 +59,7 @@ namespace igbgui
 
         public IGBViewer(IGBViewerSettings viewersettings, GLControlSettings settings, IGBRetFuncDelegate igbgetter) : base(settings)
         {
-            igb = igbgetter;
+            getigb = igbgetter;
             viewerSettings = viewersettings;
         }
 
@@ -77,24 +76,21 @@ namespace igbgui
         protected override void Render()
         {
             base.Render();
-            if (igb() != null)
+            var igb = getigb();
+            if (igb != null)
             {
-                foreach (var obj in igb().Objects)
+                foreach (var obj in igb.Objects)
                 {
                     if (viewerSettings.DisplayAABBs && obj is PhantomAABB aabb)
                     {
                         var pos = aabb.Pos.Value;
                         var size = aabb.Size.Value;
-                        var cols = new Color4[12 * 2];
-                        for (int i = 0; i < cols.Length; ++i)
-                        {
-                            cols[i] = new Color4(.5f, 0, 0, 1f);
-                        }
+                        render.Projection.UserColor1 = new(.5f, 0, 0, 1f);
+                        render.Projection.PushColorMode(ProjectionInfo.ColorModeEnum.Solid);
                         render.Projection.UserTrans = pos;
                         render.Projection.UserScale = size;
-                        render.Projection.UserAxis = new Vector4(1, 0, 0, 0);
+                        render.Projection.UserAxis = new(1, 0, 0, 0);
                         vaoLineModel.UpdatePositions(boxVerts);
-                        vaoLineModel.UpdateColors(cols);
                         vaoLineModel.Render(render);
                     }
                     else if (viewerSettings.DisplayOBBs && obj is PhantomOBB obb)
@@ -102,16 +98,12 @@ namespace igbgui
                         var pos = obb.Pos.Value;
                         var size = obb.Size.Value;
                         var rot = obb.Quat.Value;
-                        var cols = new Color4[12 * 2];
-                        for (int i = 0; i < cols.Length; ++i)
-                        {
-                            cols[i] = new Color4(0, .5f, .5f, 1f);
-                        }
+                        render.Projection.UserColor1 = new(0, .5f, .5f, 1f);
+                        render.Projection.PushColorMode(ProjectionInfo.ColorModeEnum.Solid);
                         render.Projection.UserTrans = pos;
                         render.Projection.UserScale = size;
                         render.Projection.UserAxis = rot;
                         vaoLineModel.UpdatePositions(boxVerts);
-                        vaoLineModel.UpdateColors(cols);
                         vaoLineModel.Render(render);
                     }
                     else if (obj is LevelInfoAi info_ai)
@@ -212,12 +204,9 @@ namespace igbgui
             var verts = new Vector4[points.Count];
             for (int i = 0; i < points.Count; ++i)
             {
-                verts[i].X = points[i].X;
-                verts[i].Y = points[i].Y;
-                verts[i].Z = points[i].Z;
-                verts[i].W = 1;
+                verts[i] = new(points[i], 1);
             }
-            render.Projection.PushColorMode(ProjectionInfo.ColorModeEnum.Plain);
+            render.Projection.PushColorMode(ProjectionInfo.ColorModeEnum.Solid);
             render.Projection.UserColor1 = col;
             vaoLineLoop.UpdatePositions(verts);
             vaoLineLoop.Render(render);
@@ -229,12 +218,9 @@ namespace igbgui
             var verts = new Vector4[nodes.Count];
             for (int i = 0; i < nodes.Count; ++i)
             {
-                verts[i].X = nodes[i].Pos.X;
-                verts[i].Y = nodes[i].Pos.Y;
-                verts[i].Z = nodes[i].Pos.Z;
-                verts[i].W = 1;
+                verts[i] = new(nodes[i].Pos, 1);
             }
-            render.Projection.PushColorMode(ProjectionInfo.ColorModeEnum.Plain);
+            render.Projection.PushColorMode(ProjectionInfo.ColorModeEnum.Solid);
             render.Projection.UserColor1 = col;
             vaoLineStrip.UpdatePositions(verts);
             vaoLineStrip.Render(render);

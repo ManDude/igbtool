@@ -29,11 +29,11 @@ namespace igbgui
         public static bool ReadBool(byte[] data, int offset) => BitConverter.ToBoolean(data, offset);
         public static int ReadInt(byte[] data, int offset) => BitConverter.ToInt32(data, offset);
         public static float ReadFloat(byte[] data, int offset) => BitConverter.ToSingle(data, offset);
-        public static string ReadString(byte[] data, int offset) => Encoding.UTF8.GetString(data, offset+4, ReadInt(data, offset));
-        public static Vector3 ReadVec3f(byte[] data, int offset) => new Vector3(ReadFloat(data, offset + 0), ReadFloat(data, offset + 4), ReadFloat(data, offset + 8));
-        public static Vector4 ReadVec4f(byte[] data, int offset) => new Vector4(ReadFloat(data, offset + 0), ReadFloat(data, offset + 4), ReadFloat(data, offset + 8), ReadFloat(data, offset + 12));
-        public static CrystalData ReadCrystalData(byte[] data, int offset) => new CrystalData(data, offset);
-        public static CNKLetterData ReadCNKLetterData(byte[] data, int offset) => new CNKLetterData(data, offset);
-        public static MagGravNode ReadMagGravNode(byte[] data, int offset) => new MagGravNode(data, offset);
+        public static string ReadString(byte[] data, int offset) => Encoding.UTF8.GetString(data, offset + 4, ReadInt(data, offset));
+        public static Vector3 ReadVec3f(byte[] data, int offset) => new(ReadFloat(data, offset + 0), ReadFloat(data, offset + 4), ReadFloat(data, offset + 8));
+        public static Vector4 ReadVec4f(byte[] data, int offset) => new(ReadFloat(data, offset + 0), ReadFloat(data, offset + 4), ReadFloat(data, offset + 8), ReadFloat(data, offset + 12));
+        public static CrystalData ReadCrystalData(byte[] data, int offset) => new(data, offset);
+        public static CNKLetterData ReadCNKLetterData(byte[] data, int offset) => new(data, offset);
+        public static MagGravNode ReadMagGravNode(byte[] data, int offset) => new(data, offset);
     }
 }

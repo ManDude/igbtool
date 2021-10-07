@@ -10,9 +10,9 @@ namespace igbgui.Structs
 
         public CNKLetterData(byte[] data, int offset)
         {
-            Letter = BitUtils.ReadInt(data, offset+0);
-            Pos = BitUtils.ReadVec3f(data, offset+4);
-            Rot = BitUtils.ReadVec4f(data, offset+16);
+            Letter = BitUtils.ReadInt(data, offset + 0);
+            Pos = BitUtils.ReadVec3f(data, offset + 4);
+            Rot = BitUtils.ReadVec4f(data, offset + 16);
         }
     }
 }

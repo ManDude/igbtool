@@ -10,9 +10,9 @@ namespace igbgui.Structs
 
         public CrystalData(byte[] data, int offset)
         {
-            Pos = BitUtils.ReadVec3f(data, offset+0);
-            Rot = BitUtils.ReadVec4f(data, offset+12);
-            Val = BitUtils.ReadInt(data, offset+28);
+            Pos = BitUtils.ReadVec3f(data, offset + 0);
+            Rot = BitUtils.ReadVec4f(data, offset + 12);
+            Val = BitUtils.ReadInt(data, offset + 28);
         }
     }
 }

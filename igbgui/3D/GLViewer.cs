@@ -47,7 +47,7 @@ namespace igbgui
         private bool mouseleft = false;
         private int mousex = 0;
         private int mousey = 0;
-        private float movespeed = 25f;
+        private float movespeed = 30f;
         private float rotspeed = 0.5f;
 
         private const float PerFrame = 1f / 60f;
@@ -199,7 +199,7 @@ namespace igbgui
 
         protected virtual void ActualRunLogic()
         {
-            var d = movespeed * PerFrame * (render.Distance/RenderInfo.InitialDistance);
+            var d = movespeed * PerFrame * (render.Distance / RenderInfo.InitialDistance);
             if (KDown(Keys.ControlKey))
             {
                 if (KDown(Keys.W)) render.Projection.Trans.Y += d;
@@ -253,7 +253,7 @@ namespace igbgui
             lock (render.mLock)
             {
                 var olddist = render.Distance;
-                float delta = (float)e.Delta / SystemInformation.MouseWheelScrollDelta;
+                float delta = (float)e.Delta / SystemInformation.MouseWheelScrollDelta * 1.5f;
                 render.Distance = Math.Max(RenderInfo.MinDistance, Math.Min(render.Distance - delta, RenderInfo.MaxDistance));
                 render.Projection.Trans -= (Matrix4.CreateFromQuaternion(new Quaternion(render.Projection.Rot)) * new Vector4(0, 0, render.Distance - olddist, 1)).Xyz;
             }

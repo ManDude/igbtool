@@ -1,7 +1,6 @@
 ﻿using igbgui.Fields;
-using System;
-using System.Collections.Generic;
 using OpenTK.Mathematics;
+using System.Collections.Generic;
 
 namespace igbgui.Objects
 {

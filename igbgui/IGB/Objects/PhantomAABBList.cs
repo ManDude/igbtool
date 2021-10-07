@@ -1,9 +1,4 @@
-﻿using igbgui.Fields;
-using System;
-using System.Collections.Generic;
-using OpenTK.Mathematics;
-
-namespace igbgui.Objects
+﻿namespace igbgui.Objects
 {
     public class PhantomAABBList : igObjectList<PhantomAABB>, IigList<PhantomAABB>
     {

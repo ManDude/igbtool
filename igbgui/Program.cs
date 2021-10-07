@@ -1,10 +1,10 @@
 using System;
-using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace igbgui
 {
-  static class Program
+    static class Program
     {
         [DllImport("kernel32.dll")]
         static extern bool AllocConsole();

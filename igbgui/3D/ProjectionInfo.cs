@@ -21,7 +21,7 @@ namespace igbgui
         public Color4 UserColor1;
         public Color4 UserColor2;
 
-        public enum ColorModeEnum { Default = 0, GradientY = 1, Plain = 2 };
+        public enum ColorModeEnum { Default = 0, GradientY = 1, Solid = 2 };
         public ColorModeEnum ColorMode;
         public Stack<ColorModeEnum> ColorModeStack;
         public void PushColorMode(ColorModeEnum mode)

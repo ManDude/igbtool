@@ -1,6 +1,4 @@
-﻿using igbgui.Fields;
-
-namespace igbgui.Objects
+﻿namespace igbgui.Objects
 {
     public class igObject : IgbObject
     {

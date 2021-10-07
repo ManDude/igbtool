@@ -9,8 +9,8 @@ namespace igbgui.Structs
 
         public MagGravNode(byte[] data, int offset)
         {
-            Pos = BitUtils.ReadVec3f(data, offset+0);
-            Grav = BitUtils.ReadVec3f(data, offset+12);
+            Pos = BitUtils.ReadVec3f(data, offset + 0);
+            Grav = BitUtils.ReadVec3f(data, offset + 12);
         }
     }
 }

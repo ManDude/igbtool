@@ -1,5 +1,4 @@
 ﻿using igbgui.Fields;
-using System;
 using System.Collections.Generic;
 
 namespace igbgui.Objects
@@ -13,9 +12,12 @@ namespace igbgui.Objects
         public new List<T> GetList()
         {
             var list = new List<T>();
-            foreach (var v in DataList.Value.Data)
+            if (DataList.Value != null)
             {
-                list.Add(v.Value);
+                foreach (var v in DataList.Value.Data)
+                {
+                    list.Add(v.Value);
+                }
             }
             return list;
         }
