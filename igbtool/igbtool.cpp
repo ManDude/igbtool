@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
   lg::initialize();
 
   if (argc < 2) {
-    fmt::print("USAGE:  igbtool <igb>\n");
+    fmt::print("USAGE:  igbtool <igb> [out]\n");
     return IGB_EXIT;
   }
 

@@ -48,35 +48,35 @@ std::string type_info_default_func(const IgbTypeInfo& obj, const u8* data) {
       out += fmt::format("{}", *(bool*)(data + off));
       off += sizeof(bool);
     } else if (arg == "s8") {
-      out += fmt::format("{}", *(s8*)(data + off));
+      out += fmt::format("{:<4}", *(s8*)(data + off));
       off += sizeof(s8);
     } else if (arg == "u8") {
-      out += fmt::format("0x{:X}", *(u8*)(data + off));
+      out += fmt::format("0x{:02X}", *(u8*)(data + off));
       off += sizeof(u8);
     } else if (arg == "s16") {
-      out += fmt::format("{}", *(s16*)(data + off));
+      out += fmt::format("{:<7}", *(s16*)(data + off));
       off += sizeof(s16);
     } else if (arg == "u16") {
-      out += fmt::format("0x{:X}", *(u16*)(data + off));
+      out += fmt::format("0x{:04X}", *(u16*)(data + off));
       off += sizeof(u16);
     } else if (arg == "s32") {
-      out += fmt::format("{}", *(s32*)(data + off));
+      out += fmt::format("{:<11}", *(s32*)(data + off));
       off += sizeof(s32);
     } else if (arg == "u32") {
-      out += fmt::format("0x{:X}", *(u32*)(data + off));
+      out += fmt::format("0x{:08X}", *(u32*)(data + off));
       off += sizeof(u32);
     } else if (arg == "s64") {
-      out += fmt::format("{}", *(s64*)(data + off));
+      out += fmt::format("{:<16}", *(s64*)(data + off));
       off += sizeof(s64);
     } else if (arg == "u64") {
-      out += fmt::format("0x{:X}", *(u64*)(data + off));
+      out += fmt::format("0x{:016X}", *(u64*)(data + off));
       off += sizeof(u64);
     } else if (arg == "ref") {
       out += fmt::format("{:04X}", *(u32*)(data + off));
       off += sizeof(u32);
     } else if (arg == "float") {
       off = align(off, 4);
-      out += float_to_string(*(float*)(data + off));
+      out += fmt::format("{:13}", float_to_string(*(float*)(data + off)));
       off += sizeof(float);
     } else if (arg == "double") {
       out += fmt::format("{}", *(double*)(data + off));
