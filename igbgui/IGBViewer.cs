@@ -216,10 +216,48 @@ namespace igbgui
                             vaoLineModel.Render(render);
                         }
                     }
-                    /*else if (obj is vvSplineObj spline)
+                    else if (obj is LevelInfoRestart info_restart)
                     {
-                        RenderSpline(spline, Color4.White);
-                    }*/
+                        var restarts = info_restart.RestartList.Value.GetList();
+                        var verts = new Vector4[restarts.Count];
+                        for (int i = 0; i < restarts.Count; ++i)
+                        {
+                            verts[i] = new(restarts[i].Pos, 1);
+                        }
+                        render.Projection.PushColorMode(ProjectionInfo.ColorModeEnum.Solid);
+                        render.Projection.UserColor1 = Color4.White;
+                        vaoLineLoop.UpdatePositions(verts);
+                        vaoLineLoop.Render(render);
+                    }
+                    else if (obj is LevelInfoRanking info_ranking)
+                    {
+                        foreach (var segment in info_ranking.SegmentList.Value.GetList())
+                        {
+                            var nodes = segment.NodeList.Value.GetList();
+                            var verts = new Vector4[nodes.Count];
+                            for (int i = 0; i < nodes.Count; ++i)
+                            {
+                                verts[i] = new(nodes[i].Pos, 1);
+                            }
+                            render.Projection.PushColorMode(ProjectionInfo.ColorModeEnum.Solid);
+                            render.Projection.UserColor1 = Color4.Yellow;
+                            vaoLineLoop.UpdatePositions(verts);
+                            vaoLineLoop.Render(render);
+                            /*
+                            MakeLineSphere(3);
+                            render.Projection.UserColor1 = Color4.Yellow;
+                            render.Projection.UserColor2 = Color4.White;
+                            render.Projection.UserScale = new(2);
+                            render.Projection.UserAxis = new(1, 0, 0, 1);
+                            foreach (var node in nodes)
+                            {
+                                render.Projection.PushColorMode(ProjectionInfo.ColorModeEnum.GradientY);
+                                render.Projection.UserTrans = node.Pos;
+                                vaoSphereLine.Render(render);
+                            }
+                            */
+                        }
+                    }
                 }
             }
         }
